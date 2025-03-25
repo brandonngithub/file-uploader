@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Upload</title>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --error: #ef233c;
+            --success: #4cc9f0;
+            --text: #2b2d42;
+            --light-gray: #f8f9fa;
+            --white: #ffffff;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--light-gray);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: var(--white);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .alert-error {
+            background-color: #ffebee;
+            color: var(--error);
+            border: 1px solid var(--error);
+        }
+
+        .alert-success {
+            background-color: #e8f5e9;
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        input[type="file"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px dashed #ccc;
+            border-radius: var(--border-radius);
+            background-color: var(--light-gray);
+            transition: all 0.3s ease;
+        }
+
+        input[type="file"]:hover {
+            border-color: var(--primary);
+            background-color: #f0f4ff;
+        }
+
+        select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            background-color: var(--white);
+        }
+
+        button {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            font-size: 100px;
+            opacity: 0;
+            right: 0;
+            top: 0;
+            cursor: pointer;
+        }
+
+        .custom-file-input {
+            display: inline-block;
+            padding: 0.75rem 1rem;
+            background-color: var(--light-gray);
+            border: 2px dashed #ccc;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            text-align: center;
+            width: 100%;
+        }
+
+        .custom-file-input:hover {
+            border-color: var(--primary);
+            background-color: #f0f4ff;
+        }
+
+        .file-name {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Upload a File</h1>
+        
+        <% if (error) { %>
+            <div class="alert alert-error"><%= error %></div>
+        <% } %>
+        
+        <% if (success) { %>
+            <div class="alert alert-success"><%= success %></div>
+        <% } %>
+        
+        <form action="/upload" method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="file">Select File</label>
+                <div class="file-input-wrapper">
+                    <div class="custom-file-input" id="file-label">Choose a file...</div>
+                    <input type="file" name="file" id="file" required onchange="updateFileName()">
+                </div>
+                <div class="file-name" id="file-name-display"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="folder">Select Folder (optional)</label>
+                <select name="folderId" id="folder">
+                    <option value="">-- No Folder --</option>
+                    <% folders.forEach(folder => { %>
+                        <option value="<%= folder.id %>"><%= folder.name %></option>
+                    <% }); %>
+                </select>
+            </div>
+            
+            <button type="submit">Upload File</button>
+        </form>
+    </div>
+
+    <script>
+        function updateFileName() {
+            const fileInput = document.getElementById('file');
+            const fileNameDisplay = document.getElementById('file-name-display');
+            const fileLabel = document.getElementById('file-label');
+            
+            if (fileInput.files.length > 0) {
+                fileLabel.textContent = fileInput.files[0].name;
+                fileNameDisplay.textContent = `Size: ${(fileInput.files[0].size / 1024).toFixed(2)} KB`;
+            } else {
+                fileLabel.textContent = 'Choose a file...';
+                fileNameDisplay.textContent = '';
+            }
+        }
+    </script>
+</body>
+</html>
