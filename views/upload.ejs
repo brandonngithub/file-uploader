@@ -151,11 +151,44 @@
             font-size: 0.9rem;
             color: #666;
         }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab.active {
+            border-bottom-color: var(--primary);
+            font-weight: 600;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Upload a File</h1>
+        <h1>File Manager</h1>
         
         <% if (error) { %>
             <div class="alert alert-error"><%= error %></div>
@@ -165,28 +198,45 @@
             <div class="alert alert-success"><%= success %></div>
         <% } %>
         
-        <form action="/upload" method="POST" enctype="multipart/form-data">
-            <div class="form-group">
-                <label for="file">Select File</label>
-                <div class="file-input-wrapper">
-                    <div class="custom-file-input" id="file-label">Choose a file...</div>
-                    <input type="file" name="file" id="file" required onchange="updateFileName()">
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('upload')">Upload File</div>
+            <div class="tab" onclick="switchTab('folder')">Create Folder</div>
+        </div>
+        
+        <div id="upload-tab" class="tab-content active">
+            <form action="/upload" method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="file">Select File</label>
+                    <div class="file-input-wrapper">
+                        <div class="custom-file-input" id="file-label">Choose a file...</div>
+                        <input type="file" name="file" id="file" required onchange="updateFileName()">
+                    </div>
+                    <div class="file-name" id="file-name-display"></div>
                 </div>
-                <div class="file-name" id="file-name-display"></div>
-            </div>
-            
-            <div class="form-group">
-                <label for="folder">Select Folder (optional)</label>
-                <select name="folderId" id="folder">
-                    <option value="">-- No Folder --</option>
-                    <% folders.forEach(folder => { %>
-                        <option value="<%= folder.id %>"><%= folder.name %></option>
-                    <% }); %>
-                </select>
-            </div>
-            
-            <button type="submit">Upload File</button>
-        </form>
+                
+                <div class="form-group">
+                    <label for="folder">Select Folder (optional)</label>
+                    <select name="folderId" id="folder">
+                        <option value="">-- Main Directory --</option>
+                        <% folders.forEach(folder => { %>
+                            <option value="<%= folder.id %>"><%= folder.name %></option>
+                        <% }); %>
+                    </select>
+                </div>
+                
+                <button type="submit">Upload File</button>
+            </form>
+        </div>
+        
+        <div id="folder-tab" class="tab-content">
+            <form action="/create-folder" method="POST">
+                <div class="form-group">
+                    <label for="folderName">Folder Name</label>
+                    <input type="text" name="folderName" id="folderName" required>
+                </div>
+                <button type="submit">Create Folder</button>
+            </form>
+        </div>
     </div>
 
     <script>
@@ -202,6 +252,20 @@
                 fileLabel.textContent = 'Choose a file...';
                 fileNameDisplay.textContent = '';
             }
+        }
+        
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            document.querySelector(`.tab[onclick="switchTab('${tabName}')"]`).classList.add('active');
         }
     </script>
 </body>

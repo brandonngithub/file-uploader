@@ -9,6 +9,7 @@ app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
 app.use(express.static('public'));
+app.use(express.urlencoded({ extended: true }));
 
 // Display upload form
 app.get('/upload', async (req, res) => {
@@ -28,39 +29,57 @@ app.get('/upload', async (req, res) => {
     }
 });
 
+// Handle folder creation
+app.post('/create-folder', async (req, res) => {
+    try {
+        const { folderName } = req.body;
+        
+        if (!folderName) {
+            return res.redirect('/upload?error=Folder name is required');
+        }
+
+        await prisma.folder.create({
+            data: {
+                name: folderName
+            }
+        });
+
+        res.redirect('/upload?success=Folder created successfully');
+    } catch (error) {
+        let errorMessage = 'Failed to create folder';
+        if (error.code === 'P2002') {
+            errorMessage = 'A folder with this name already exists';
+        }
+        res.redirect(`/upload?error=${encodeURIComponent(errorMessage)}`);
+    }
+});
+
 // Handle file upload
 app.post('/upload', upload.single('file'), async (req, res) => {
     try {
         if (!req.file) {
-            return res.render('upload', {
-                folders: await prisma.folder.findMany(),
-                error: 'No file selected',
-                success: ''
-            });
+            return res.redirect('/upload?error=No file selected');
         }
 
-        const newFile = await prisma.file.create({
-            data: {
-                name: req.file.originalname,
-                type: path.extname(req.file.originalname).substring(1),
-                size: req.file.size,
-                path: req.file.path,
-                url: `/uploads/${req.file.filename}`,
-                parentId: req.body.folderId || null
-            }
+        const fileData = {
+            name: req.file.originalname,
+            type: path.extname(req.file.originalname).substring(1),
+            size: req.file.size,
+            path: req.file.path,
+            url: `/uploads/${req.file.filename}`
+        };
+
+        if (req.body.folderId) {
+            fileData.folderId = req.body.folderId;
+        }
+
+        await prisma.file.create({
+            data: fileData
         });
 
-        res.render('upload', {
-            folders: await prisma.folder.findMany(),
-            error: '',
-            success: 'File uploaded successfully!' 
-        });
+        res.redirect('/upload?success=File uploaded successfully');
     } catch (error) {
-        res.render('upload', { 
-            folders: await prisma.folder.findMany(),
-            error: error.message,
-            success: ''
-        });
+        res.redirect(`/upload?error=${encodeURIComponent(error.message)}`);
     }
 });
 
