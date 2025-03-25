@@ -12,3 +12,23 @@ datasource db {
   provider = "postgresql"
   url      = env("PSQL_CONNECTION_STRING")
 }
+
+model File {
+  id          String   @id @default(uuid())
+  name        String
+  type        String    // e.g., 'pdf', 'jpg', 'docx'
+  size        Int       // in bytes
+  path        String    // Storage path
+  url         String?   // Download URL
+  createdAt   DateTime  @default(now())
+  parent      Folder?   @relation(fields: [parentId], references: [id])
+  parentId    String?
+}
+
+model Folder {
+  id          String    @id @default(uuid())
+  name        String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  files       File[]
+}

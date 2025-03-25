@@ -1,4 +1,5 @@
 const express = require('express');
+const prisma = require('./db')
 
 const app = express();
 
