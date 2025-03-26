@@ -11,20 +11,26 @@ app.set("view engine", "ejs");
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 
-// Display upload form
-app.get('/upload', async (req, res) => {
+// Display main drive view
+app.get('/', async (req, res) => {
     try {
         const folders = await prisma.folder.findMany();
-        res.render('upload', {
-            folders: folders,
-            error: '',
-            success: ''
+        const files = await prisma.file.findMany({
+            where: { folderId: null }
+        });
+        
+        res.render('drive', { 
+            folders,
+            files,
+            error: req.query.error || null,
+            success: req.query.success || null
         });
     } catch (error) {
-        res.render('upload', { 
-            folders: [], 
-            error: 'Failed to load folders',
-            success: ''
+        res.render('drive', { 
+            folders: [],
+            files: [],
+            error: 'Failed to load content',
+            success: null
         });
     }
 });
@@ -35,7 +41,7 @@ app.post('/create-folder', async (req, res) => {
         const { folderName } = req.body;
         
         if (!folderName) {
-            return res.redirect('/upload?error=Folder name is required');
+            return res.redirect('/?error=Folder name is required');
         }
 
         await prisma.folder.create({
@@ -44,13 +50,13 @@ app.post('/create-folder', async (req, res) => {
             }
         });
 
-        res.redirect('/upload?success=Folder created successfully');
+        res.redirect('/?success=Folder created successfully');
     } catch (error) {
         let errorMessage = 'Failed to create folder';
         if (error.code === 'P2002') {
             errorMessage = 'A folder with this name already exists';
         }
-        res.redirect(`/upload?error=${encodeURIComponent(errorMessage)}`);
+        res.redirect(`/?error=${encodeURIComponent(errorMessage)}`);
     }
 });
 
@@ -58,7 +64,7 @@ app.post('/create-folder', async (req, res) => {
 app.post('/upload', upload.single('file'), async (req, res) => {
     try {
         if (!req.file) {
-            return res.redirect('/upload?error=No file selected');
+            return res.redirect('/?error=No file selected');
         }
 
         const fileData = {
@@ -77,9 +83,9 @@ app.post('/upload', upload.single('file'), async (req, res) => {
             data: fileData
         });
 
-        res.redirect('/upload?success=File uploaded successfully');
+        res.redirect('/?success=File uploaded successfully');
     } catch (error) {
-        res.redirect(`/upload?error=${encodeURIComponent(error.message)}`);
+        res.redirect(`/?error=${encodeURIComponent(error.message)}`);
     }
 });
 
