@@ -14,45 +14,21 @@ app.use(express.urlencoded({ extended: true }));
 // Display main drive view
 app.get("/", async (req, res) => {
   try {
-    const folders = await prisma.folder.findMany({
-      orderBy: { name: "asc" }, // Optional: sort folders alphabetically
-    });
+    const folders = await prisma.folder.findMany();
 
     const files = await prisma.file.findMany({
-      where: { folderId: null },
-      orderBy: { name: "asc" }, // Optional: sort files alphabetically
+      where: { folderId: null }, // only display files not in folders
     });
-
-    // Helper function to format file sizes
-    const formatFileSize = (bytes) => {
-      if (!bytes) return "0 Bytes";
-      const k = 1024;
-      const sizes = ["Bytes", "KB", "MB", "GB"];
-      const i = Math.floor(Math.log(bytes) / Math.log(k));
-      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
-    };
-
-    // Helper function to format dates
-    const formatDate = (date) => {
-      return new Date(date).toLocaleString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-    };
 
     res.render("index", {
       folders,
       files,
       error: req.query.error || null,
       success: req.query.success || null,
-      formatFileSize, // Make the helper available in EJS
-      formatDate, // Make the date formatter available
     });
   } catch (error) {
     console.error("Error loading content:", error);
+
     res.render("index", {
       folders: [],
       files: [],
@@ -62,8 +38,8 @@ app.get("/", async (req, res) => {
   }
 });
 
-// Handle folder creation
-app.post("/create-folder", async (req, res) => {
+// Create new folder
+app.post("/folder", async (req, res) => {
   try {
     const { folderName } = req.body;
 
@@ -87,8 +63,8 @@ app.post("/create-folder", async (req, res) => {
   }
 });
 
-// Handle file upload
-app.post("/upload", upload.single("file"), async (req, res) => {
+// Create new file
+app.post("/file", upload.single("file"), async (req, res) => {
   try {
     if (!req.file) {
       return res.redirect("/?error=No file selected");
