@@ -63,6 +63,45 @@ app.post("/folder", async (req, res) => {
   }
 });
 
+// View folder contents
+app.get("/folder/:id", async (req, res) => {
+  try {
+    const folder = await prisma.folder.findUnique({
+      where: { id: req.params.id },
+    });
+
+    const files = await prisma.file.findMany({
+      where: { folderId: req.params.id },
+      orderBy: { name: "asc" },
+    });
+
+    res.render("folder", {
+      folder,
+      files,
+      error: req.query.error || null,
+      success: req.query.success || null,
+      formatFileSize: (bytes) => {
+        if (!bytes) return "0 Bytes";
+        const k = 1024;
+        const sizes = ["Bytes", "KB", "MB", "GB"];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+      },
+      formatDate: (date) => {
+        return new Date(date).toLocaleString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      },
+    });
+  } catch (error) {
+    res.redirect("/?error=Folder not found");
+  }
+});
+
 // Create new file
 app.post("/file", upload.single("file"), async (req, res) => {
   try {

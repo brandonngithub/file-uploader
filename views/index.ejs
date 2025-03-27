@@ -18,7 +18,7 @@
         <div class="sidebar">
             <div class="sidebar-item active">
                 <i class="material-icons">home</i>
-                <span>My Files</span>
+                <span>Home</span>
             </div>
             <div class="new-button">
                 <button onclick="toggleNewMenu()">
@@ -65,7 +65,7 @@
                     </thead>
                     <tbody>
                         <% folders.forEach(folder => { %>
-                            <tr class="folder-row">
+                            <tr class="folder-row" data-folder-id="<%= folder.id %>" ondblclick="navigateToFolder(this)">
                                 <td class="name-cell">
                                     <div class="file-info">
                                         <i class="material-icons folder-icon">folder</i>
@@ -171,6 +171,12 @@
 
         function hideModal(type) {
             document.getElementById(`${type}Modal`).classList.remove('show');
+        }
+
+        // Navigate to folder on double click
+        function navigateToFolder(row) {
+            const folderId = row.getAttribute('data-folder-id');
+            window.location.href = `/folder/${folderId}`;
         }
     </script>
 </body>
