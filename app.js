@@ -131,4 +131,37 @@ app.post("/file", upload.single("file"), async (req, res) => {
   }
 });
 
+// Add this with your other routes
+app.delete('/file/:id', async (req, res) => {
+  try {
+      // First get the file to find its path
+      const file = await prisma.file.findUnique({
+          where: { id: req.params.id }
+      });
+
+      if (!file) {
+          return res.status(404).json({ message: 'File not found' });
+      }
+
+      // Delete from database
+      await prisma.file.delete({
+          where: { id: req.params.id }
+      });
+
+      // Delete the actual file (optional)
+      const fs = require('fs');
+      const path = require('path');
+      const filePath = path.join(__dirname, 'public', file.path);
+      
+      fs.unlink(filePath, (err) => {
+          if (err) console.error('Error deleting file:', err);
+      });
+
+      res.status(200).send();
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Failed to delete file' });
+  }
+});
+
 app.listen(3000, () => console.log("Listening on port 3000"));

@@ -375,3 +375,22 @@ h1 {
 .folder-row:hover {
   background-color: #f1f3f4;
 }
+
+.actions-cell {
+  width: 60px;
+  text-align: center;
+}
+
+.delete-button {
+  background: none;
+  border: none;
+  color: var(--error);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.delete-button:hover {
+  background-color: #fce8e6;
+}
