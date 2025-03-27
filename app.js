@@ -102,38 +102,44 @@ app.get("/folder/:id", async (req, res) => {
   }
 });
 
+// Delete a folder
 app.delete('/folder/:id', async (req, res) => {
+  const fs = require('fs');
+  const path = require('path');
+
   try {
-      const fs = require('fs');
-      const path = require('path');
+    // First get all files in the folder
+    const files = await prisma.file.findMany({
+      where: { folderId: req.params.id }
+    });
 
-      // First get all files in the folder
-      const files = await prisma.file.findMany({
-          where: { folderId: req.params.id }
+    // Delete all files from storage
+    const deletePromises = files.map(file => {
+      return new Promise((resolve) => {
+        const filePath = path.join(__dirname, 'public', file.path);
+        fs.unlink(filePath, (err) => {
+          if (err) console.error('Error deleting file:', err);
+          resolve();
+        });
       });
+    });
 
-      // Delete all files from storage
-      files.forEach(file => {
-          const filePath = path.join(__dirname, 'public', file.path);
-          fs.unlink(filePath, (err) => {
-              if (err) console.error('Error deleting file:', err);
-          });
-      });
+    await Promise.all(deletePromises);
 
-      // Delete all files from database
-      await prisma.file.deleteMany({
-          where: { folderId: req.params.id }
-      });
+    // Delete all files from database
+    await prisma.file.deleteMany({
+      where: { folderId: req.params.id }
+    });
 
-      // Finally delete the folder
-      await prisma.folder.delete({
-          where: { id: req.params.id }
-      });
+    // Finally delete the folder
+    await prisma.folder.delete({
+      where: { id: req.params.id }
+    });
 
-      res.status(200).send();
+    res.status(200).send();
   } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: 'Failed to delete folder' });
+    console.error(error);
+    res.status(500).json({ message: 'Failed to delete folder' });
   }
 });
 
@@ -144,11 +150,14 @@ app.post("/file", upload.single("file"), async (req, res) => {
       return res.redirect("/?error=No file selected");
     }
 
+    // Store relative path from public directory
+    const relativePath = path.join('uploads', req.file.filename);
+
     const fileData = {
       name: req.file.originalname,
       type: path.extname(req.file.originalname).substring(1),
       size: req.file.size,
-      path: req.file.path,
+      path: relativePath,  // Store relative path
       url: `/uploads/${req.file.filename}`,
     };
 
@@ -162,40 +171,47 @@ app.post("/file", upload.single("file"), async (req, res) => {
 
     res.redirect("/?success=File uploaded successfully");
   } catch (error) {
+    // Clean up the uploaded file if database operation fails
+    if (req.file) {
+      const fs = require('fs');
+      fs.unlink(req.file.path, () => {});
+    }
     res.redirect(`/?error=${encodeURIComponent(error.message)}`);
   }
 });
 
-// Add this with your other routes
+// Delete a file
 app.delete('/file/:id', async (req, res) => {
+  const fs = require('fs');
+  const path = require('path');
+
   try {
-      // First get the file to find its path
-      const file = await prisma.file.findUnique({
-          where: { id: req.params.id }
-      });
+    const file = await prisma.file.findUnique({
+      where: { id: req.params.id }
+    });
 
-      if (!file) {
-          return res.status(404).json({ message: 'File not found' });
+    if (!file) {
+      return res.status(404).json({ message: 'File not found' });
+    }
+
+    // Delete from database first
+    await prisma.file.delete({
+      where: { id: req.params.id }
+    });
+
+    // Delete the actual file
+    const filePath = path.join(__dirname, 'public', file.path);
+    fs.unlink(filePath, (err) => {
+      if (err) {
+        console.error('Error deleting file:', err);
+        // Even if file deletion fails, we've removed the DB record
       }
+    });
 
-      // Delete from database
-      await prisma.file.delete({
-          where: { id: req.params.id }
-      });
-
-      // Delete the actual file (optional)
-      const fs = require('fs');
-      const path = require('path');
-      const filePath = path.join(__dirname, 'public', file.path);
-      
-      fs.unlink(filePath, (err) => {
-          if (err) console.error('Error deleting file:', err);
-      });
-
-      res.status(200).send();
+    res.status(200).send();
   } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: 'Failed to delete file' });
+    console.error(error);
+    res.status(500).json({ message: 'Failed to delete file' });
   }
 });
 
