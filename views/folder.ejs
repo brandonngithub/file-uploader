@@ -10,10 +10,7 @@
 </head>
 <body>
     <header>
-        <div class="logo">
-            <i class="material-icons" onclick="window.location.href='/'">drive_file_move</i>
-            <h1>File Uploader</h1>
-        </div>
+        <h1>File Uploader</h1>
         <div class="user-avatar">B</div>
     </header>
 
@@ -21,6 +18,10 @@
         <div class="sidebar">
             <div class="sidebar-item" onclick="window.location.href='/'">
                 <i class="material-icons">home</i>
+                <span>Home</span>
+            </div>
+            <div class="sidebar-item active">
+                <i class="material-icons">folder</i>
                 <span><%= folder.name %></span>
             </div>
         </div>
@@ -39,13 +40,6 @@
                     <%= success %>
                 </div>
             <% } %>
-
-            <!-- Breadcrumb navigation -->
-            <div class="breadcrumb">
-                <a href="/">My Drive</a>
-                <i class="material-icons">chevron_right</i>
-                <span><%= folder.name %></span>
-            </div>
         
             <div class="files-table-container">
                 <table class="files-table">
