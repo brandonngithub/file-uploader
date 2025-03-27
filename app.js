@@ -102,6 +102,41 @@ app.get("/folder/:id", async (req, res) => {
   }
 });
 
+app.delete('/folder/:id', async (req, res) => {
+  try {
+      const fs = require('fs');
+      const path = require('path');
+
+      // First get all files in the folder
+      const files = await prisma.file.findMany({
+          where: { folderId: req.params.id }
+      });
+
+      // Delete all files from storage
+      files.forEach(file => {
+          const filePath = path.join(__dirname, 'public', file.path);
+          fs.unlink(filePath, (err) => {
+              if (err) console.error('Error deleting file:', err);
+          });
+      });
+
+      // Delete all files from database
+      await prisma.file.deleteMany({
+          where: { folderId: req.params.id }
+      });
+
+      // Finally delete the folder
+      await prisma.folder.delete({
+          where: { id: req.params.id }
+      });
+
+      res.status(200).send();
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Failed to delete folder' });
+  }
+});
+
 // Create new file
 app.post("/file", upload.single("file"), async (req, res) => {
   try {
