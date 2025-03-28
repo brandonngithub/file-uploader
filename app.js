@@ -12,7 +12,7 @@ app.use(express.json());
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true }));
 
-// Display main drive view
+// Display home page
 app.get("/", async (req, res) => {
   try {
     const folders = await prisma.folder.findMany();
@@ -39,7 +39,7 @@ app.get("/", async (req, res) => {
   }
 });
 
-// Create new folder
+// Route for creating new folder
 app.post("/folder", async (req, res) => {
   try {
     const { folderName } = req.body;
@@ -64,7 +64,7 @@ app.post("/folder", async (req, res) => {
   }
 });
 
-// View folder contents
+// Display folder
 app.get("/folder/:id", async (req, res) => {
   try {
     const folder = await prisma.folder.findUnique({
@@ -103,7 +103,7 @@ app.get("/folder/:id", async (req, res) => {
   }
 });
 
-// Delete a folder
+// Route for deleting a folder
 app.delete("/folder/:id", async (req, res) => {
   const fs = require("fs");
   const path = require("path");
@@ -144,9 +144,8 @@ app.delete("/folder/:id", async (req, res) => {
   }
 });
 
-// Rename folder
+// Route for renaming a folder
 app.patch("/folder/:id/rename", express.json(), async (req, res) => {
-  // Add express.json() middleware
   try {
     const { newName } = req.body;
 
@@ -174,7 +173,7 @@ app.patch("/folder/:id/rename", express.json(), async (req, res) => {
   }
 });
 
-// Create new file
+// Route for creating a new file
 app.post("/file", upload.single("file"), async (req, res) => {
   try {
     if (!req.file) {
@@ -211,7 +210,7 @@ app.post("/file", upload.single("file"), async (req, res) => {
   }
 });
 
-// Delete a file
+// Route for deleting a file
 app.delete("/file/:id", async (req, res) => {
   const fs = require("fs");
   const path = require("path");
@@ -246,7 +245,7 @@ app.delete("/file/:id", async (req, res) => {
   }
 });
 
-// Rename file
+// Route for renaming a file
 app.patch("/file/:id/rename", express.json(), async (req, res) => {
   // Add express.json() middleware
   const fs = require("fs");
