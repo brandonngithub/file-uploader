@@ -1,6 +1,3 @@
-/* folder.css - Perfectly matches index.css styling */
-
-/* Inherit all variables and base styles */
 :root {
   --primary: #4285f4;
   --primary-dark: #3367d6;
@@ -260,4 +257,150 @@ h1 {
   .file-info {
     gap: 8px;
   }
+}
+
+/* Folder Actions */
+.folder-actions {
+  padding: 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.folder-actions button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  width: 100%;
+  border: none;
+}
+
+.folder-actions .rename-button {
+  background-color: #e8f0fe;
+  color: var(--primary);
+}
+
+.folder-actions .delete-button {
+  background-color: #fce8e6;
+  color: var(--error);
+}
+
+.folder-actions button:hover {
+  opacity: 0.9;
+}
+
+/* Modals */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal.show {
+  display: flex;
+}
+
+.modal-content {
+  background-color: var(--white);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  width: 480px;
+  max-width: 90%;
+  padding: 24px;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.modal-header h2 {
+  font-weight: 500;
+  font-size: 20px;
+}
+
+.modal-body {
+  margin-bottom: 24px;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* Buttons */
+.cancel-button {
+  background: none;
+  border: 1px solid #e0e0e0;
+  padding: 8px 16px;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+}
+
+.create-button {
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+}
+
+.delete-confirm-button {
+  background-color: var(--error);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+}
+
+/* Actions Column */
+.actions-column {
+  width: 120px;
+}
+
+.actions-cell {
+  display: flex;
+  gap: 8px;
+}
+
+.rename-button, .delete-button {
+  background: none;
+  border: none;
+  padding: 8px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rename-button {
+  color: var(--primary);
+}
+
+.rename-button:hover {
+  background-color: #e8f0fe;
+}
+
+.delete-button {
+  color: var(--error);
+}
+
+.delete-button:hover {
+  background-color: #fce8e6;
 }
