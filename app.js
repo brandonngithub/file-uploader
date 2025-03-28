@@ -8,6 +8,7 @@ const app = express();
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
+app.use(express.json());
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true }));
 
@@ -103,22 +104,22 @@ app.get("/folder/:id", async (req, res) => {
 });
 
 // Delete a folder
-app.delete('/folder/:id', async (req, res) => {
-  const fs = require('fs');
-  const path = require('path');
+app.delete("/folder/:id", async (req, res) => {
+  const fs = require("fs");
+  const path = require("path");
 
   try {
     // First get all files in the folder
     const files = await prisma.file.findMany({
-      where: { folderId: req.params.id }
+      where: { folderId: req.params.id },
     });
 
     // Delete all files from storage
-    const deletePromises = files.map(file => {
+    const deletePromises = files.map((file) => {
       return new Promise((resolve) => {
-        const filePath = path.join(__dirname, 'public', file.path);
+        const filePath = path.join(__dirname, "public", file.path);
         fs.unlink(filePath, (err) => {
-          if (err) console.error('Error deleting file:', err);
+          if (err) console.error("Error deleting file:", err);
           resolve();
         });
       });
@@ -128,18 +129,48 @@ app.delete('/folder/:id', async (req, res) => {
 
     // Delete all files from database
     await prisma.file.deleteMany({
-      where: { folderId: req.params.id }
+      where: { folderId: req.params.id },
     });
 
     // Finally delete the folder
     await prisma.folder.delete({
-      where: { id: req.params.id }
+      where: { id: req.params.id },
     });
 
     res.status(200).send();
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Failed to delete folder' });
+    res.status(500).json({ message: "Failed to delete folder" });
+  }
+});
+
+// Rename folder
+app.patch("/folder/:id/rename", express.json(), async (req, res) => {
+  // Add express.json() middleware
+  try {
+    const { newName } = req.body;
+
+    if (!newName || typeof newName !== "string") {
+      return res
+        .status(400)
+        .json({ message: "New name is required and must be a string" });
+    }
+
+    const updatedFolder = await prisma.folder.update({
+      where: { id: req.params.id },
+      data: { name: newName },
+    });
+
+    res.status(200).json(updatedFolder);
+  } catch (error) {
+    console.error(error);
+
+    let message = "Failed to rename folder";
+    if (error.code === "P2002") {
+      message = "A folder with this name already exists";
+    }
+
+    res.status(500).json({ message });
   }
 });
 
@@ -151,13 +182,13 @@ app.post("/file", upload.single("file"), async (req, res) => {
     }
 
     // Store relative path from public directory
-    const relativePath = path.join('uploads', req.file.filename);
+    const relativePath = path.join("uploads", req.file.filename);
 
     const fileData = {
       name: req.file.originalname,
       type: path.extname(req.file.originalname).substring(1),
       size: req.file.size,
-      path: relativePath,  // Store relative path
+      path: relativePath, // Store relative path
       url: `/uploads/${req.file.filename}`,
     };
 
@@ -173,7 +204,7 @@ app.post("/file", upload.single("file"), async (req, res) => {
   } catch (error) {
     // Clean up the uploaded file if database operation fails
     if (req.file) {
-      const fs = require('fs');
+      const fs = require("fs");
       fs.unlink(req.file.path, () => {});
     }
     res.redirect(`/?error=${encodeURIComponent(error.message)}`);
@@ -181,29 +212,29 @@ app.post("/file", upload.single("file"), async (req, res) => {
 });
 
 // Delete a file
-app.delete('/file/:id', async (req, res) => {
-  const fs = require('fs');
-  const path = require('path');
+app.delete("/file/:id", async (req, res) => {
+  const fs = require("fs");
+  const path = require("path");
 
   try {
     const file = await prisma.file.findUnique({
-      where: { id: req.params.id }
+      where: { id: req.params.id },
     });
 
     if (!file) {
-      return res.status(404).json({ message: 'File not found' });
+      return res.status(404).json({ message: "File not found" });
     }
 
     // Delete from database first
     await prisma.file.delete({
-      where: { id: req.params.id }
+      where: { id: req.params.id },
     });
 
     // Delete the actual file
-    const filePath = path.join(__dirname, 'public', file.path);
+    const filePath = path.join(__dirname, "public", file.path);
     fs.unlink(filePath, (err) => {
       if (err) {
-        console.error('Error deleting file:', err);
+        console.error("Error deleting file:", err);
         // Even if file deletion fails, we've removed the DB record
       }
     });
@@ -211,7 +242,48 @@ app.delete('/file/:id', async (req, res) => {
     res.status(200).send();
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Failed to delete file' });
+    res.status(500).json({ message: "Failed to delete file" });
+  }
+});
+
+// Rename file
+app.patch("/file/:id/rename", express.json(), async (req, res) => {
+  // Add express.json() middleware
+  const fs = require("fs");
+  const path = require("path");
+
+  try {
+    const { newName } = req.body;
+
+    if (!newName || typeof newName !== "string") {
+      return res
+        .status(400)
+        .json({ message: "New name is required and must be a string" });
+    }
+
+    // Get current file
+    const file = await prisma.file.findUnique({
+      where: { id: req.params.id },
+    });
+
+    if (!file) {
+      return res.status(404).json({ message: "File not found" });
+    }
+
+    // Get file extension
+    const ext = path.extname(file.name);
+    const newFileName = newName.endsWith(ext) ? newName : newName + ext;
+
+    // Update database
+    const updatedFile = await prisma.file.update({
+      where: { id: req.params.id },
+      data: { name: newFileName },
+    });
+
+    res.status(200).json(updatedFile);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to rename file" });
   }
 });
 

@@ -77,6 +77,9 @@
                                 <td>-</td>
                                 <td><%= new Date(folder.createdAt).toLocaleString() %></td>
                                 <td class="actions-cell">
+                                    <button class="rename-button" onclick="showRenameModal('folder', '<%= folder.id %>', '<%= folder.name %>')">
+                                        <i class="material-icons">edit</i>
+                                    </button>
                                     <button class="delete-button" onclick="deleteFolder('<%= folder.id %>')">
                                         <i class="material-icons">delete</i>
                                     </button>
@@ -96,6 +99,9 @@
                                 <td><%= file.size %> Bytes</td>
                                 <td><%= new Date(file.createdAt).toLocaleString() %></td>
                                 <td class="actions-cell">
+                                    <button class="rename-button" onclick="showRenameModal('file', '<%= file.id %>', '<%= file.name %>')">
+                                        <i class="material-icons">edit</i>
+                                    </button>
                                     <button class="delete-button" onclick="deleteFile('<%= file.id %>')">
                                         <i class="material-icons">delete</i>
                                     </button>
@@ -152,6 +158,28 @@
                 <div class="modal-footer">
                     <button type="button" class="cancel-button" onclick="hideModal('file')">Cancel</button>
                     <button type="submit" class="create-button">Upload</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Rename Modal -->
+    <div class="modal" id="renameModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="renameModalTitle">Rename</h2>
+                <button class="close-button" onclick="hideModal('rename')">&times;</button>
+            </div>
+            <form id="renameForm">
+                <div class="form-group">
+                    <label for="newName">New name</label>
+                    <input type="text" name="newName" id="newName" required>
+                </div>
+                <input type="hidden" id="renameType" name="type">
+                <input type="hidden" id="renameId" name="id">
+                <div class="modal-footer">
+                    <button type="button" class="cancel-button" onclick="hideModal('rename')">Cancel</button>
+                    <button type="submit" class="create-button">Rename</button>
                 </div>
             </form>
         </div>
@@ -231,6 +259,49 @@
                 }
             }
         }
+
+        // Show rename modal
+        function showRenameModal(type, id, currentName) {
+            document.getElementById('renameModalTitle').textContent = `Rename ${type}`;
+            document.getElementById('newName').value = currentName;
+            document.getElementById('renameType').value = type;
+            document.getElementById('renameId').value = id;
+            document.getElementById('renameModal').classList.add('show');
+        }
+
+        // Handle rename form submission
+        document.getElementById('renameForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const type = document.getElementById('renameType').value;
+            const id = document.getElementById('renameId').value;
+            const newName = document.getElementById('newName').value.trim();
+            
+            if (!newName) {
+                alert('Please enter a name');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/${type}/${id}/rename`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ newName: newName }) // Ensure proper property name
+                });
+                
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    const error = await response.json();
+                    alert(`Error: ${error.message}`);
+                }
+            } catch (err) {
+                alert('Failed to rename');
+                console.error(err);
+            }
+        });
     </script>
 </body>
 </html>
