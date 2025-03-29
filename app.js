@@ -159,70 +159,80 @@ app.delete("/folder/:id", ensureAuthenticated, async (req, res) => {
 });
 
 // Route for renaming a folder
-app.patch("/folder/:id/rename", ensureAuthenticated, express.json(), async (req, res) => {
-  try {
-    const { newName } = req.body;
+app.patch(
+  "/folder/:id/rename",
+  ensureAuthenticated,
+  express.json(),
+  async (req, res) => {
+    try {
+      const { newName } = req.body;
 
-    if (!newName || typeof newName !== "string") {
-      return res
-        .status(400)
-        .json({ message: "New name is required and must be a string" });
+      if (!newName || typeof newName !== "string") {
+        return res
+          .status(400)
+          .json({ message: "New name is required and must be a string" });
+      }
+
+      const updatedFolder = await prisma.folder.update({
+        where: { id: req.params.id },
+        data: { name: newName },
+      });
+
+      res.status(200).json(updatedFolder);
+    } catch (error) {
+      console.error(error);
+
+      let message = "Failed to rename folder";
+      if (error.code === "P2002") {
+        message = "A folder with this name already exists";
+      }
+
+      res.status(500).json({ message });
     }
-
-    const updatedFolder = await prisma.folder.update({
-      where: { id: req.params.id },
-      data: { name: newName },
-    });
-
-    res.status(200).json(updatedFolder);
-  } catch (error) {
-    console.error(error);
-
-    let message = "Failed to rename folder";
-    if (error.code === "P2002") {
-      message = "A folder with this name already exists";
-    }
-
-    res.status(500).json({ message });
-  }
-});
+  },
+);
 
 // Route for creating a new file
-app.post("/file", ensureAuthenticated, upload.single("file"), async (req, res) => {
-  try {
-    if (!req.file) {
-      return res.redirect("/?error=No file selected");
+app.post(
+  "/file",
+  ensureAuthenticated,
+  upload.single("file"),
+  async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.redirect("/?error=No file selected");
+      }
+
+      // Store relative path from public directory
+      const relativePath = path.join("uploads", req.file.filename);
+
+      const fileData = {
+        name: req.file.originalname,
+        type: path.extname(req.file.originalname).substring(1),
+        size: req.file.size,
+        path: relativePath, // Store relative path
+        url: `/uploads/${req.file.filename}`,
+      };
+
+      if (req.body.folderId) {
+        fileData.folderId = req.body.folderId;
+      }
+
+      await prisma.file.create({
+        data: fileData,
+      });
+
+      res.redirect("/?success=File uploaded successfully");
+    } catch (error) {
+      // Clean up the uploaded file if database operation fails
+      if (req.file) {
+        const fs = require("fs");
+        fs.unlink(req.file.path, () => {});
+      }
+      res.redirect(`/?error=${encodeURIComponent(error.message)}`);
     }
-
-    // Store relative path from public directory
-    const relativePath = path.join("uploads", req.file.filename);
-
-    const fileData = {
-      name: req.file.originalname,
-      type: path.extname(req.file.originalname).substring(1),
-      size: req.file.size,
-      path: relativePath, // Store relative path
-      url: `/uploads/${req.file.filename}`,
-    };
-
-    if (req.body.folderId) {
-      fileData.folderId = req.body.folderId;
-    }
-
-    await prisma.file.create({
-      data: fileData,
-    });
-
-    res.redirect("/?success=File uploaded successfully");
-  } catch (error) {
-    // Clean up the uploaded file if database operation fails
-    if (req.file) {
-      const fs = require("fs");
-      fs.unlink(req.file.path, () => {});
-    }
-    res.redirect(`/?error=${encodeURIComponent(error.message)}`);
-  }
-});
+  },
+);
 
 // Route for deleting a file
 app.delete("/file/:id", ensureAuthenticated, async (req, res) => {
@@ -260,45 +270,50 @@ app.delete("/file/:id", ensureAuthenticated, async (req, res) => {
 });
 
 // Route for renaming a file
-app.patch("/file/:id/rename", ensureAuthenticated, express.json(), async (req, res) => {
-  // Add express.json() middleware
-  const fs = require("fs");
-  const path = require("path");
+app.patch(
+  "/file/:id/rename",
+  ensureAuthenticated,
+  express.json(),
+  async (req, res) => {
+    // Add express.json() middleware
+    const fs = require("fs");
+    const path = require("path");
 
-  try {
-    const { newName } = req.body;
+    try {
+      const { newName } = req.body;
 
-    if (!newName || typeof newName !== "string") {
-      return res
-        .status(400)
-        .json({ message: "New name is required and must be a string" });
+      if (!newName || typeof newName !== "string") {
+        return res
+          .status(400)
+          .json({ message: "New name is required and must be a string" });
+      }
+
+      // Get current file
+      const file = await prisma.file.findUnique({
+        where: { id: req.params.id },
+      });
+
+      if (!file) {
+        return res.status(404).json({ message: "File not found" });
+      }
+
+      // Get file extension
+      const ext = path.extname(file.name);
+      const newFileName = newName.endsWith(ext) ? newName : newName + ext;
+
+      // Update database
+      const updatedFile = await prisma.file.update({
+        where: { id: req.params.id },
+        data: { name: newFileName },
+      });
+
+      res.status(200).json(updatedFile);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Failed to rename file" });
     }
-
-    // Get current file
-    const file = await prisma.file.findUnique({
-      where: { id: req.params.id },
-    });
-
-    if (!file) {
-      return res.status(404).json({ message: "File not found" });
-    }
-
-    // Get file extension
-    const ext = path.extname(file.name);
-    const newFileName = newName.endsWith(ext) ? newName : newName + ext;
-
-    // Update database
-    const updatedFile = await prisma.file.update({
-      where: { id: req.params.id },
-      data: { name: newFileName },
-    });
-
-    res.status(200).json(updatedFile);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Failed to rename file" });
-  }
-});
+  },
+);
 
 // Route for viewing file details
 app.get("/file/:id", ensureAuthenticated, async (req, res) => {
