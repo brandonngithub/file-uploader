@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Uploader</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/styles/file.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <h1>File Uploader</h1>
+        <div class="user-avatar">B</div>
+    </header>
+
+    <div class="main">
+        <div class="sidebar">
+            <div class="sidebar-item" onclick="window.location.href='/'">
+                <i class="material-icons">home</i>
+                <span>Home</span>
+            </div>
+            <div class="sidebar-item active">
+                <i class="material-icons">folder</i>
+                <span><%= file.name %></span>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="file-details-container">
+                <div class="file-preview">
+                    <% if (file.type.match(/^image\//)) { %>
+                        <img src="<%= file.url %>" alt="<%= file.name %>" class="preview-image">
+                    <% } else { %>
+                        <div class="file-icon-large">
+                            <i class="material-icons">insert_drive_file</i>
+                            <span class="file-extension"><%= file.type %></span>
+                        </div>
+                    <% } %>
+                </div>
+
+                <div class="file-info-details">
+                    <h2><%= file.name %></h2>
+                    
+                    <div class="file-properties">
+                        <div class="property">
+                            <span class="property-label">Type:</span>
+                            <span class="property-value"><%= file.type %></span>
+                        </div>
+                        <div class="property">
+                            <span class="property-label">Size:</span>
+                            <span class="property-value"><%= formatFileSize(file.size) %></span>
+                        </div>
+                        <div class="property">
+                            <span class="property-label">Uploaded:</span>
+                            <span class="property-value"><%= formatDate(file.createdAt) %></span>
+                        </div>
+                        <div class="property">
+                            <span class="property-label">Location:</span>
+                            <span class="property-value">
+                                <% if (file.folderId) { %>
+                                    Folder
+                                <% } else { %>
+                                    My Drive
+                                <% } %>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="file-actions">
+                        <a href="<%= file.url %>" download="<%= file.name %>" class="download-button">
+                            <i class="material-icons">download</i>
+                            <span>Download</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function deleteFile(fileId) {
+            if (confirm('Are you sure you want to delete this file?')) {
+                try {
+                    const response = await fetch(`/file/${fileId}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    if (response.ok) {
+                        window.location.href = '/?success=File deleted successfully';
+                    } else {
+                        const error = await response.json();
+                        alert(`Error: ${error.message}`);
+                    }
+                } catch (err) {
+                    alert('Failed to delete file');
+                    console.error(err);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
