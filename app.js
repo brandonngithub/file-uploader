@@ -5,6 +5,7 @@ const upload = require("./middlewares/upload");
 const session = require("express-session");
 const passport = require("./middlewares/passport");
 const bcrypt = require("bcrypt");
+const ensureAuthenticated = require("./middlewares/auth");
 
 const app = express();
 
@@ -27,7 +28,7 @@ app.use(
 app.use(passport.session());
 
 // Display home page
-app.get("/", async (req, res) => {
+app.get("/", ensureAuthenticated, async (req, res) => {
   try {
     const folders = await prisma.folder.findMany();
     const files = await prisma.file.findMany({
@@ -53,7 +54,7 @@ app.get("/", async (req, res) => {
 });
 
 // Route for creating new folder
-app.post("/folder", async (req, res) => {
+app.post("/folder", ensureAuthenticated, async (req, res) => {
   try {
     const { folderName } = req.body;
 
@@ -78,7 +79,7 @@ app.post("/folder", async (req, res) => {
 });
 
 // Display folder
-app.get("/folder/:id", async (req, res) => {
+app.get("/folder/:id", ensureAuthenticated, async (req, res) => {
   try {
     const folder = await prisma.folder.findUnique({
       where: { id: req.params.id },
@@ -117,7 +118,7 @@ app.get("/folder/:id", async (req, res) => {
 });
 
 // Route for deleting a folder
-app.delete("/folder/:id", async (req, res) => {
+app.delete("/folder/:id", ensureAuthenticated, async (req, res) => {
   const fs = require("fs");
   const path = require("path");
 
@@ -158,7 +159,7 @@ app.delete("/folder/:id", async (req, res) => {
 });
 
 // Route for renaming a folder
-app.patch("/folder/:id/rename", express.json(), async (req, res) => {
+app.patch("/folder/:id/rename", ensureAuthenticated, express.json(), async (req, res) => {
   try {
     const { newName } = req.body;
 
@@ -187,7 +188,7 @@ app.patch("/folder/:id/rename", express.json(), async (req, res) => {
 });
 
 // Route for creating a new file
-app.post("/file", upload.single("file"), async (req, res) => {
+app.post("/file", ensureAuthenticated, upload.single("file"), async (req, res) => {
   try {
     if (!req.file) {
       return res.redirect("/?error=No file selected");
@@ -224,7 +225,7 @@ app.post("/file", upload.single("file"), async (req, res) => {
 });
 
 // Route for deleting a file
-app.delete("/file/:id", async (req, res) => {
+app.delete("/file/:id", ensureAuthenticated, async (req, res) => {
   const fs = require("fs");
   const path = require("path");
 
@@ -259,7 +260,7 @@ app.delete("/file/:id", async (req, res) => {
 });
 
 // Route for renaming a file
-app.patch("/file/:id/rename", express.json(), async (req, res) => {
+app.patch("/file/:id/rename", ensureAuthenticated, express.json(), async (req, res) => {
   // Add express.json() middleware
   const fs = require("fs");
   const path = require("path");
@@ -300,7 +301,7 @@ app.patch("/file/:id/rename", express.json(), async (req, res) => {
 });
 
 // Route for viewing file details
-app.get("/file/:id", async (req, res) => {
+app.get("/file/:id", ensureAuthenticated, async (req, res) => {
   try {
     const file = await prisma.file.findUnique({
       where: { id: req.params.id },
@@ -355,7 +356,7 @@ app.post(
 );
 
 // Log out of app
-app.get("/auth/logout", (req, res) => {
+app.get("/auth/logout", ensureAuthenticated, (req, res) => {
   req.logout((err) => {
     if (err) {
       return res.redirect("/?error=Failed to logout");
@@ -398,14 +399,6 @@ app.post("/user", async (req, res) => {
     console.error(error);
     res.redirect("/auth/signup?error=Error creating account");
   }
-});
-
-// Used in login for checking existing user
-app.get("/user", (req, res) => {
-  if (!req.isAuthenticated()) {
-    return res.redirect("/auth/login");
-  }
-  res.json(req.user);
 });
 
 app.listen(3000, () => console.log("Listening on port 3000"));
