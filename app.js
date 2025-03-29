@@ -40,6 +40,7 @@ app.get("/", ensureAuthenticated, async (req, res) => {
       files,
       error: req.query.error || null,
       success: req.query.success || null,
+      user: req.user,
     });
   } catch (error) {
     console.error("Error loading content:", error);
@@ -49,6 +50,7 @@ app.get("/", ensureAuthenticated, async (req, res) => {
       files: [],
       error: "Failed to load content",
       success: null,
+      user: req.user,
     });
   }
 });
@@ -95,6 +97,7 @@ app.get("/folder/:id", ensureAuthenticated, async (req, res) => {
       files,
       error: req.query.error || null,
       success: req.query.success || null,
+      user: req.user,
       formatFileSize: (bytes) => {
         if (!bytes) return "0 Bytes";
         const k = 1024;
@@ -328,6 +331,7 @@ app.get("/file/:id", ensureAuthenticated, async (req, res) => {
 
     res.render("file", {
       file,
+      user: req.user,
       formatFileSize: (bytes) => {
         if (!bytes) return "0 Bytes";
         const k = 1024;
