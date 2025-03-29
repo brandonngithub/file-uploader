@@ -16,7 +16,6 @@ app.use(express.urlencoded({ extended: true }));
 app.get("/", async (req, res) => {
   try {
     const folders = await prisma.folder.findMany();
-
     const files = await prisma.file.findMany({
       where: { folderId: null }, // only display files not in folders
     });
@@ -321,5 +320,20 @@ app.get("/file/:id", async (req, res) => {
     res.redirect("/?error=Failed to load file details");
   }
 });
+
+// Render signup form
+app.get("/auth/signup", async (req, res) => {});
+
+// Render login form
+app.get("/auth/login", async (req, res) => {});
+
+// Log out of app
+app.get("/auth/logout", async (req, res) => {});
+
+// Used in signup to create new user
+app.post("/user", async (req, res) => {});
+
+// Used in login for checking existing user
+app.get("/user", async (req, res) => {});
 
 app.listen(3000, () => console.log("Listening on port 3000"));
