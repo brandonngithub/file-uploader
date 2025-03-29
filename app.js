@@ -2,6 +2,9 @@ const express = require("express");
 const path = require("path");
 const prisma = require("./db");
 const upload = require("./middlewares/upload");
+const session = require("express-session");
+const passport = require("./middlewares/passport");
+const bcrypt = require("bcrypt");
 
 const app = express();
 
@@ -11,6 +14,17 @@ app.set("view engine", "ejs");
 app.use(express.json());
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true }));
+
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || "my-secret-key",
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: false },
+  }),
+);
+
+app.use(passport.session());
 
 // Display home page
 app.get("/", async (req, res) => {
@@ -322,18 +336,76 @@ app.get("/file/:id", async (req, res) => {
 });
 
 // Render signup form
-app.get("/auth/signup", async (req, res) => {});
+app.get("/auth/signup", (req, res) => {
+  res.render("signup", { error: req.query.error });
+});
 
 // Render login form
-app.get("/auth/login", async (req, res) => {});
+app.get("/auth/login", (req, res) => {
+  res.render("login", { error: req.query.error });
+});
+
+app.post(
+  "/auth/login",
+  passport.authenticate("local", {
+    successRedirect: "/",
+    failureRedirect: "/auth/login?error=Invalid credentials",
+    failureFlash: false,
+  }),
+);
 
 // Log out of app
-app.get("/auth/logout", async (req, res) => {});
+app.get("/auth/logout", (req, res) => {
+  req.logout((err) => {
+    if (err) {
+      return res.redirect("/?error=Failed to logout");
+    }
+    res.redirect("/auth/login");
+  });
+});
 
 // Used in signup to create new user
-app.post("/user", async (req, res) => {});
+app.post("/user", async (req, res) => {
+  try {
+    const { name, password } = req.body;
+
+    // Basic validation
+    if (!name || !password) {
+      return res.redirect(
+        "/auth/signup?error=Username and password are required",
+      );
+    }
+
+    // Check if user exists
+    const existingUser = await prisma.user.findUnique({ where: { name } });
+    if (existingUser) {
+      return res.redirect("/auth/signup?error=Username already exists");
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create user
+    await prisma.user.create({
+      data: {
+        name,
+        password: hashedPassword,
+      },
+    });
+
+    res.redirect("/auth/login?success=Account created successfully");
+  } catch (error) {
+    console.error(error);
+    res.redirect("/auth/signup?error=Error creating account");
+  }
+});
 
 // Used in login for checking existing user
-app.get("/user", async (req, res) => {});
+app.get("/user", (req, res) => {
+  if (!req.isAuthenticated()) {
+    return res.redirect("/auth/login");
+  }
+  res.json(req.user);
+});
 
 app.listen(3000, () => console.log("Listening on port 3000"));
