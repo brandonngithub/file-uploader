@@ -99,22 +99,22 @@
     <!-- Rename Modal -->
     <div class="modal" id="renameModal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="renameModalTitle">Rename</h2>
-                <button class="close-button" onclick="hideModal('rename')">&times;</button>
+        <div class="modal-header">
+            <h2>Rename File</h2>
+            <button class="close-button" onclick="hideModal('rename')">&times;</button>
+        </div>
+        <form id="renameForm">
+            <div class="form-group">
+            <label for="newName">New name</label>
+            <input type="text" name="newName" id="newName" required>
             </div>
-            <form id="renameForm">
-                <div class="form-group">
-                    <label for="newName">New name</label>
-                    <input type="text" name="newName" id="newName" required>
-                </div>
-                <input type="hidden" id="renameType" name="type">
-                <input type="hidden" id="renameId" name="id">
-                <div class="modal-footer">
-                    <button type="button" class="cancel-button" onclick="hideModal('rename')">Cancel</button>
-                    <button type="submit" class="create-button">Rename</button>
-                </div>
-            </form>
+            <input type="hidden" id="renameType" name="type">
+            <input type="hidden" id="renameId" name="id">
+            <div class="modal-footer">
+            <button type="button" class="cancel-button" onclick="hideModal('rename')">Cancel</button>
+            <button type="submit" class="create-button">Rename</button>
+            </div>
+        </form>
         </div>
     </div>
 
@@ -150,10 +150,15 @@
 
         // Show rename modal
         function showRenameModal(type, id, currentName) {
-            document.getElementById('renameModalTitle').textContent = `Rename ${type}`;
-            document.getElementById('newName').value = currentName;
+            const modal = document.getElementById('renameModal');
+            const title = modal.querySelector('h2');
+            const input = modal.querySelector('#newName');
+            
+            title.textContent = `Rename ${type}`;
+            input.value = currentName.replace(/\.[^/.]+$/, ""); // Remove extension
             document.getElementById('renameType').value = type;
             document.getElementById('renameId').value = id;
+            
             showModal('rename');
         }
 
@@ -163,11 +168,17 @@
             
             const type = document.getElementById('renameType').value;
             const id = document.getElementById('renameId').value;
-            const newName = document.getElementById('newName').value.trim();
+            let newName = document.getElementById('newName').value.trim();
+            const fileExt = type === 'file' ? `.${document.querySelector(`tr[data-file-id="${id}"] td:nth-child(2)`).textContent.toLowerCase()}` : '';
             
             if (!newName) {
                 alert('Please enter a name');
                 return;
+            }
+
+            // Add extension back for files
+            if (type === 'file' && !newName.endsWith(fileExt)) {
+                newName += fileExt;
             }
 
             try {
