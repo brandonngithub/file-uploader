@@ -68,6 +68,7 @@ app.post("/folder", ensureAuthenticated, async (req, res) => {
     await prisma.folder.create({
       data: {
         name: folderName,
+        userId: req.user.id,
       },
     });
 
@@ -75,7 +76,7 @@ app.post("/folder", ensureAuthenticated, async (req, res) => {
   } catch (error) {
     let errorMessage = "Failed to create folder";
     if (error.code === "P2002") {
-      errorMessage = "A folder with this name already exists";
+      errorMessage = "A folder with this name already exists for this user";
     }
     res.redirect(`/?error=${encodeURIComponent(errorMessage)}`);
   }
