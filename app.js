@@ -6,6 +6,7 @@ const session = require("express-session");
 const passport = require("./middlewares/passport");
 const bcrypt = require("bcrypt");
 const ensureAuthenticated = require("./middlewares/auth");
+const supabase = require("./middlewares/supabase");
 
 const app = express();
 
@@ -199,22 +200,41 @@ app.patch(
 app.post(
   "/file",
   ensureAuthenticated,
-  upload.single("file"),
+  upload.single("file"), // Still using multer to get the file buffer
   async (req, res) => {
     try {
       if (!req.file) {
         return res.redirect("/?error=No file selected");
       }
 
-      // Store relative path from public directory
-      const relativePath = path.join("uploads", req.file.filename);
+      // Generate a unique filename
+      const fileExt = path.extname(req.file.originalname);
+      const fileName = `${Date.now()}${fileExt}`;
+      const filePath = `uploads/${req.user.id}/${fileName}`;
+
+      // Upload to Supabase Storage
+      const { data, error } = await supabase.storage
+        .from("files") // Your bucket name
+        .upload(filePath, req.file.buffer, {
+          contentType: req.file.mimetype,
+          upsert: false,
+        });
+
+      if (error) {
+        throw new Error(`Supabase upload error: ${error.message}`);
+      }
+
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from("files")
+        .getPublicUrl(filePath);
 
       const fileData = {
         name: req.file.originalname,
         type: path.extname(req.file.originalname).substring(1),
         size: req.file.size,
-        path: relativePath, // Store relative path
-        url: `/uploads/${req.file.filename}`,
+        url: urlData.publicUrl,
+        userId: req.user.id,
       };
 
       if (req.body.folderId) {
@@ -227,11 +247,7 @@ app.post(
 
       res.redirect("/?success=File uploaded successfully");
     } catch (error) {
-      // Clean up the uploaded file if database operation fails
-      if (req.file) {
-        const fs = require("fs");
-        fs.unlink(req.file.path, () => {});
-      }
+      console.error(error);
       res.redirect(`/?error=${encodeURIComponent(error.message)}`);
     }
   },
@@ -239,9 +255,6 @@ app.post(
 
 // Route for deleting a file
 app.delete("/file/:id", ensureAuthenticated, async (req, res) => {
-  const fs = require("fs");
-  const path = require("path");
-
   try {
     const file = await prisma.file.findUnique({
       where: { id: req.params.id },
@@ -256,14 +269,17 @@ app.delete("/file/:id", ensureAuthenticated, async (req, res) => {
       where: { id: req.params.id },
     });
 
-    // Delete the actual file
-    const filePath = path.join(__dirname, "public", file.path);
-    fs.unlink(filePath, (err) => {
-      if (err) {
-        console.error("Error deleting file:", err);
-        // Even if file deletion fails, we've removed the DB record
-      }
-    });
+    // Extract path from URL (assuming URL is like: https://[supabase-url]/storage/v1/object/public/files/path/to/file)
+    const urlParts = file.url.split("/");
+    const filePath = urlParts.slice(urlParts.indexOf("files") + 1).join("/");
+
+    // Delete from Supabase Storage
+    const { error } = await supabase.storage.from("files").remove([filePath]);
+
+    if (error) {
+      console.error("Error deleting file from Supabase:", error);
+      // We've already deleted the DB record, so just log the error
+    }
 
     res.status(200).send();
   } catch (error) {
