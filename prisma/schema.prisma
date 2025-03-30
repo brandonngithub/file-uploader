@@ -45,3 +45,12 @@ model User {
   files     File[]
   folders   Folder[]
 }
+
+model Session {
+  id        String   @id
+  sid       String   @unique
+  data      String
+  expiresAt DateTime @map("expires_at")
+  
+  @@map("sessions")
+}

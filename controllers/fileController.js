@@ -1,5 +1,6 @@
 const prisma = require("../db");
 const supabase = require("../middlewares/supabase");
+const path = require("path");
 
 async function createFile(req, res) {
   try {

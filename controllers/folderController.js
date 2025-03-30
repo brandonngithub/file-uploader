@@ -1,4 +1,5 @@
 const prisma = require("../db");
+const supabase = require("../middlewares/supabase");
 
 async function createFolder(req, res) {
   try {
@@ -75,9 +76,6 @@ async function displayFolder(req, res) {
 }
 
 async function deleteFolder(req, res) {
-  const fs = require("fs");
-  const path = require("path");
-
   try {
     // First get all files in the folder
     const files = await prisma.file.findMany({
@@ -87,15 +85,26 @@ async function deleteFolder(req, res) {
       },
     });
 
-    // Delete all files from storage
-    const deletePromises = files.map((file) => {
-      return new Promise((resolve) => {
-        const filePath = path.join(__dirname, "public", file.path);
-        fs.unlink(filePath, (err) => {
-          if (err) console.error("Error deleting file:", err);
-          resolve();
-        });
-      });
+    // Delete all files from Supabase storage
+    const deletePromises = files.map(async (file) => {
+      try {
+        // Extract path from URL (assuming URL is like: https://[supabase-url]/storage/v1/object/public/files/path/to/file)
+        const urlParts = file.url.split("/");
+        const filePath = urlParts
+          .slice(urlParts.indexOf("files") + 1)
+          .join("/");
+
+        // Delete from Supabase Storage
+        const { error } = await supabase.storage
+          .from("files")
+          .remove([filePath]);
+
+        if (error) {
+          console.error("Error deleting file from Supabase:", error);
+        }
+      } catch (err) {
+        console.error("Error processing file deletion:", err);
+      }
     });
 
     await Promise.all(deletePromises);
