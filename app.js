@@ -31,9 +31,15 @@ app.use(passport.session());
 // Display home page
 app.get("/", ensureAuthenticated, async (req, res) => {
   try {
-    const folders = await prisma.folder.findMany();
+    const folders = await prisma.folder.findMany({
+      where: { userId: req.user.id }, // Only show current user's folders
+    });
+
     const files = await prisma.file.findMany({
-      where: { folderId: null }, // only display files not in folders
+      where: {
+        folderId: null, // Only files not in folders
+        userId: req.user.id, // Only show current user's files
+      },
     });
 
     res.render("index", {
@@ -86,11 +92,21 @@ app.post("/folder", ensureAuthenticated, async (req, res) => {
 app.get("/folder/:id", ensureAuthenticated, async (req, res) => {
   try {
     const folder = await prisma.folder.findUnique({
-      where: { id: req.params.id },
+      where: {
+        id: req.params.id,
+        userId: req.user.id, // Ensure the folder belongs to current user
+      },
     });
 
+    if (!folder) {
+      return res.redirect("/?error=Folder not found or access denied");
+    }
+
     const files = await prisma.file.findMany({
-      where: { folderId: req.params.id },
+      where: {
+        folderId: req.params.id,
+        userId: req.user.id, // Only show current user's files
+      },
       orderBy: { name: "asc" },
     });
 
@@ -130,7 +146,10 @@ app.delete("/folder/:id", ensureAuthenticated, async (req, res) => {
   try {
     // First get all files in the folder
     const files = await prisma.file.findMany({
-      where: { folderId: req.params.id },
+      where: {
+        folderId: req.params.id,
+        userId: req.user.id,
+      },
     });
 
     // Delete all files from storage
@@ -148,12 +167,18 @@ app.delete("/folder/:id", ensureAuthenticated, async (req, res) => {
 
     // Delete all files from database
     await prisma.file.deleteMany({
-      where: { folderId: req.params.id },
+      where: {
+        folderId: req.params.id,
+        userId: req.user.id,
+      },
     });
 
     // Finally delete the folder
     await prisma.folder.delete({
-      where: { id: req.params.id },
+      where: {
+        id: req.params.id,
+        userId: req.user.id,
+      },
     });
 
     res.status(200).send();
@@ -179,7 +204,10 @@ app.patch(
       }
 
       const updatedFolder = await prisma.folder.update({
-        where: { id: req.params.id },
+        where: {
+          id: req.params.id,
+          userId: req.user.id,
+        },
         data: { name: newName },
       });
 
@@ -258,7 +286,10 @@ app.post(
 app.delete("/file/:id", ensureAuthenticated, async (req, res) => {
   try {
     const file = await prisma.file.findUnique({
-      where: { id: req.params.id },
+      where: {
+        id: req.params.id,
+        userId: req.user.id,
+      },
     });
 
     if (!file) {
@@ -267,7 +298,10 @@ app.delete("/file/:id", ensureAuthenticated, async (req, res) => {
 
     // Delete from database first
     await prisma.file.delete({
-      where: { id: req.params.id },
+      where: {
+        id: req.params.id,
+        userId: req.user.id,
+      },
     });
 
     // Extract path from URL (assuming URL is like: https://[supabase-url]/storage/v1/object/public/files/path/to/file)
@@ -310,7 +344,10 @@ app.patch(
 
       // Get current file
       const file = await prisma.file.findUnique({
-        where: { id: req.params.id },
+        where: {
+          id: req.params.id,
+          userId: req.user.id,
+        },
       });
 
       if (!file) {
@@ -323,7 +360,10 @@ app.patch(
 
       // Update database
       const updatedFile = await prisma.file.update({
-        where: { id: req.params.id },
+        where: {
+          id: req.params.id,
+          userId: req.user.id,
+        },
         data: { name: newFileName },
       });
 
@@ -339,7 +379,10 @@ app.patch(
 app.get("/file/:id", ensureAuthenticated, async (req, res) => {
   try {
     const file = await prisma.file.findUnique({
-      where: { id: req.params.id },
+      where: {
+        id: req.params.id,
+        userId: req.user.id,
+      },
     });
 
     if (!file) {
