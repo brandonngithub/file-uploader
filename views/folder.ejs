@@ -202,42 +202,25 @@
             }
         });
 
-        // Delete file/folder with confirmation
+        // Delete file
         async function deleteFile(fileId) {
-            showDeleteConfirmation('file', fileId);
-        }
-
-        function showDeleteConfirmation(type, id) {
-            const title = type === 'file' ? 'Delete File' : 'Delete Folder';
-            const message = type === 'file' 
-                ? 'Are you sure you want to delete this file?' 
-                : 'Are you sure you want to delete this folder and all its contents?';
-            
-            document.getElementById('deleteModalTitle').textContent = title;
-            document.getElementById('deleteModalMessage').textContent = message;
-            
-            const confirmBtn = document.getElementById('confirmDelete');
-            confirmBtn.onclick = async () => {
+            if (confirm('Are you sure you want to delete this file?')) {
                 try {
-                    const response = await fetch(`/${type}/${id}`, {
+                    const response = await fetch(`/file/${fileId}`, {
                         method: 'DELETE'
                     });
                     
                     if (response.ok) {
-                        window.location.reload();
+                        window.location.reload(); // Refresh to show changes
                     } else {
                         const error = await response.json();
                         alert(`Error: ${error.message}`);
                     }
                 } catch (err) {
-                    alert(`Failed to delete ${type}`);
+                    alert('Failed to delete file');
                     console.error(err);
-                } finally {
-                    hideModal('delete');
                 }
-            };
-            
-            showModal('delete');
+            }
         }
     </script>
 </body>
