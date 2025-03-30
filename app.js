@@ -7,6 +7,7 @@ const passport = require("./middlewares/passport");
 const bcrypt = require("bcrypt");
 const ensureAuthenticated = require("./middlewares/auth");
 const supabase = require("./middlewares/supabase");
+const indexRouter = require("./routes/indexRouter");
 
 const app = express();
 
@@ -28,39 +29,7 @@ app.use(
 
 app.use(passport.session());
 
-// Display home page
-app.get("/", ensureAuthenticated, async (req, res) => {
-  try {
-    const folders = await prisma.folder.findMany({
-      where: { userId: req.user.id }, // Only show current user's folders
-    });
-
-    const files = await prisma.file.findMany({
-      where: {
-        folderId: null, // Only files not in folders
-        userId: req.user.id, // Only show current user's files
-      },
-    });
-
-    res.render("index", {
-      folders,
-      files,
-      error: req.query.error || null,
-      success: req.query.success || null,
-      user: req.user,
-    });
-  } catch (error) {
-    console.error("Error loading content:", error);
-
-    res.render("index", {
-      folders: [],
-      files: [],
-      error: "Failed to load content",
-      success: null,
-      user: req.user,
-    });
-  }
-});
+app.use("/", indexRouter);
 
 // Route for creating new folder
 app.post("/folder", ensureAuthenticated, async (req, res) => {
@@ -189,8 +158,7 @@ app.delete("/folder/:id", ensureAuthenticated, async (req, res) => {
 });
 
 // Route for renaming a folder
-app.patch(
-  "/folder/:id/rename",
+app.patch("/folder/:id/rename",
   ensureAuthenticated,
   express.json(),
   async (req, res) => {
@@ -226,8 +194,7 @@ app.patch(
 );
 
 // Route for creating a new file
-app.post(
-  "/file",
+app.post("/file",
   ensureAuthenticated,
   upload.single("file"), // Still using multer to get the file buffer
   async (req, res) => {
@@ -324,8 +291,7 @@ app.delete("/file/:id", ensureAuthenticated, async (req, res) => {
 });
 
 // Route for renaming a file
-app.patch(
-  "/file/:id/rename",
+app.patch("/file/:id/rename",
   ensureAuthenticated,
   express.json(),
   async (req, res) => {
@@ -415,18 +381,18 @@ app.get("/file/:id", ensureAuthenticated, async (req, res) => {
   }
 });
 
-// Render signup form
+// Display signup form
 app.get("/auth/signup", (req, res) => {
   res.render("signup", { error: req.query.error });
 });
 
-// Render login form
+// Display login form
 app.get("/auth/login", (req, res) => {
   res.render("login", { error: req.query.error });
 });
 
-app.post(
-  "/auth/login",
+// Route for checking credentials to see if can log in or not
+app.post("/auth/login",
   passport.authenticate("local", {
     successRedirect: "/",
     failureRedirect: "/auth/login?error=Invalid credentials",
@@ -434,7 +400,7 @@ app.post(
   }),
 );
 
-// Log out of app
+// Route for logging out of app
 app.get("/auth/logout", ensureAuthenticated, (req, res) => {
   req.logout((err) => {
     if (err) {
@@ -444,7 +410,7 @@ app.get("/auth/logout", ensureAuthenticated, (req, res) => {
   });
 });
 
-// Used in signup to create new user
+// Route used in signup to create new user
 app.post("/user", async (req, res) => {
   try {
     const { name, password } = req.body;
