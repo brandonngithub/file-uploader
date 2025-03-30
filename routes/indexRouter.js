@@ -4,6 +4,7 @@ const ensureAuthenticated = require("../middlewares/auth");
 
 const indexRouter = express();
 
+// Display home page
 indexRouter.get("/", ensureAuthenticated, indexController.displayIndex);
 
 module.exports = indexRouter;
