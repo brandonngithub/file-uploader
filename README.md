@@ -26,3 +26,13 @@
 
 - https://www.prisma.io/docs/getting-started/setup-prisma/start-from-scratch/relational-databases-node-postgresql
 - `npx prisma migrate dev` and `npx prisma db push` essentially same but former has version control
+- `npx prisma studio` for visual database editor
+
+### What is Prisma ORM?
+
+- https://www.prisma.io/docs/orm/overview/introduction/what-is-prisma
+
+### Prisma schema overview
+
+- https://www.prisma.io/docs/orm/prisma-schema/overview
+- can split Prisma schema into multiple files
