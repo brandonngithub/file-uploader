@@ -36,3 +36,30 @@
 
 - https://www.prisma.io/docs/orm/prisma-schema/overview
 - can split Prisma schema into multiple files
+
+### Data models
+
+- https://www.prisma.io/docs/orm/prisma-schema/data-model/models
+- Prisma models in schemas map to tables in relational databases or collections for MongoDB
+- migrating is starting with Prisma from scratch, introspecting is adding Prisma to existing database
+- @@map and @map maps Prisma names to database names
+- @@whatever is for models and @whatever is for fields
+- Prisma field types include scalar (ex int, string, enum) and relations (other models)
+- field attributes are like @id, @default, @unique, etc...
+
+### Relations
+
+- https://www.prisma.io/docs/orm/prisma-schema/data-model/relations
+- relations are connections btwn two Prisma models
+- one-to-one (1-1), one-to-many (1-n), many-to-many (m-n)
+- implicit many-to-many intermediary table handled by Prisma, explicit many-to-many intermediary table created yourself
+- reason might need explicit many-to-many is bc implicit need both models to have an id
+- every relation needs exactly two relation fields, one on each model (maybe another ex if want author and authorId foreign key)
+- in example above author is relation field, authorId is relation scalar field
+
+### Prisma client CRUD
+
+- https://www.prisma.io/docs/orm/prisma-client/queries/crud
+- basically bunch of examples on using the Prisma client CRUD operations
+- good reference if need examples
+- SIDE NOTE faker.js cool can use to seed databases from now on
