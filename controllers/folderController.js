@@ -1,5 +1,5 @@
 const prisma = require("../db");
-const supabase = require("../middlewares/supabase");
+const supabase = require("../middlewares/supabase.js");
 const { formatFileSize, formatDate } = require("../middlewares/helper.js");
 
 async function createFolder(req, res) {

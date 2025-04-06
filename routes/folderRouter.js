@@ -1,6 +1,6 @@
 const express = require("express");
+const ensureAuthenticated = require("../middlewares/auth.js");
 const folderController = require("../controllers/folderController.js");
-const ensureAuthenticated = require("../middlewares/auth");
 
 const folderRouter = express();
 
@@ -17,7 +17,6 @@ folderRouter.delete("/:id", ensureAuthenticated, folderController.deleteFolder);
 folderRouter.patch(
   "/:id/rename",
   ensureAuthenticated,
-  express.json(),
   folderController.renameFolder,
 );
 

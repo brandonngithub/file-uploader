@@ -1,7 +1,7 @@
 const express = require("express");
+const passport = require("../middlewares/passport.js");
+const ensureAuthenticated = require("../middlewares/auth.js");
 const authController = require("../controllers/authController.js");
-const ensureAuthenticated = require("../middlewares/auth");
-const passport = require("../middlewares/passport");
 
 const authRouter = express();
 

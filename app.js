@@ -2,12 +2,12 @@ const express = require("express");
 const path = require("path");
 const session = require("express-session");
 const { PrismaSessionStore } = require("@quixo3/prisma-session-store");
-const passport = require("./middlewares/passport");
-const prisma = require("./db");
-const indexRouter = require("./routes/indexRouter");
-const authRouter = require("./routes/authRouter");
-const fileRouter = require("./routes/fileRouter");
-const folderRouter = require("./routes/folderRouter");
+const passport = require("./middlewares/passport.js");
+const prisma = require("./db.js");
+const indexRouter = require("./routes/indexRouter.js");
+const authRouter = require("./routes/authRouter.js");
+const fileRouter = require("./routes/fileRouter.js");
+const folderRouter = require("./routes/folderRouter.js");
 
 const app = express();
 

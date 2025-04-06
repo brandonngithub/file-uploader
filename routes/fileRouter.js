@@ -1,7 +1,7 @@
 const express = require("express");
-const fileController = require("../controllers/fileController.js");
-const ensureAuthenticated = require("../middlewares/auth");
 const upload = require("../middlewares/upload.js");
+const ensureAuthenticated = require("../middlewares/auth.js");
+const fileController = require("../controllers/fileController.js");
 
 const fileRouter = express();
 
@@ -9,7 +9,7 @@ const fileRouter = express();
 fileRouter.post(
   "/",
   ensureAuthenticated,
-  upload.single("file"), // Still use multer to get file buffer
+  upload.single("file"), // Use multer to get file buffer
   fileController.createFile,
 );
 
@@ -17,12 +17,7 @@ fileRouter.post(
 fileRouter.delete("/:id", ensureAuthenticated, fileController.deleteFile);
 
 // Route for renaming a file
-fileRouter.patch(
-  "/:id/rename",
-  ensureAuthenticated,
-  express.json(),
-  fileController.renameFile,
-);
+fileRouter.patch("/:id/rename", ensureAuthenticated, fileController.renameFile);
 
 // Display file details
 fileRouter.get("/:id", ensureAuthenticated, fileController.displayFile);

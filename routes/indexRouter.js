@@ -1,6 +1,6 @@
 const express = require("express");
+const ensureAuthenticated = require("../middlewares/auth.js");
 const indexController = require("../controllers/indexController.js");
-const ensureAuthenticated = require("../middlewares/auth");
 
 const indexRouter = express();
 
