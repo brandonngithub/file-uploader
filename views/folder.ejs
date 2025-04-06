@@ -77,8 +77,8 @@
                                         </div>
                                     </td>
                                     <td><%= file.type.toUpperCase() %></td>
-                                    <td><%= formatFileSize(file.size) %></td>
-                                    <td><%= formatDate(file.createdAt) %></td>
+                                    <td><%= file.size %></td>
+                                    <td><%= file.createdAt %></td>
                                     <td class="actions-cell">
                                         <button class="rename-button" onclick="showRenameModal('file', '<%= file.id %>', '<%= file.name %>')">
                                             <i class="material-icons">edit</i>
@@ -119,26 +119,6 @@
     </div>
 
     <script>
-        // Format file size helper
-        function formatFileSize(bytes) {
-            if (!bytes) return '0 Bytes';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-        }
-        
-        // Format date helper
-        function formatDate(date) {
-            return new Date(date).toLocaleString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        }
-
         // Modal functions
         function showModal(type) {
             document.getElementById(`${type}Modal`).classList.add('show');

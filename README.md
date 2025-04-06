@@ -1,6 +1,7 @@
 # file_uploader
 
 - no validation and sanitization done to keep practice focus on other topics
+- need fix cant click see file details in folder
 
 ### Used
 

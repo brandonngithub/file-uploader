@@ -1,6 +1,7 @@
-const prisma = require("../db");
-const supabase = require("../middlewares/supabase");
 const path = require("path");
+const prisma = require("../db");
+const supabase = require("../middlewares/supabase.js");
+const { formatFileSize, formatDate } = require("../middlewares/helper.js");
 
 async function createFile(req, res) {
   try {
@@ -15,7 +16,7 @@ async function createFile(req, res) {
 
     // Upload to Supabase Storage
     const { data, error } = await supabase.storage
-      .from("files") // Your bucket name
+      .from("files")
       .upload(filePath, req.file.buffer, {
         contentType: req.file.mimetype,
         upsert: false,
@@ -25,7 +26,7 @@ async function createFile(req, res) {
       throw new Error(`Supabase upload error: ${error.message}`);
     }
 
-    // Get public URL
+    // Get URL
     const { data: urlData } = supabase.storage
       .from("files")
       .getPublicUrl(filePath);
@@ -66,7 +67,7 @@ async function deleteFile(req, res) {
       return res.status(404).json({ message: "File not found" });
     }
 
-    // Delete from database first
+    // Delete from database
     await prisma.file.delete({
       where: {
         id: req.params.id,
@@ -74,16 +75,15 @@ async function deleteFile(req, res) {
       },
     });
 
-    // Extract path from URL (assuming URL is like: https://[supabase-url]/storage/v1/object/public/files/path/to/file)
+    // Extract path from URL that looks like https://[supabase-url]/storage/v1/object/public/files/path/to/file
     const urlParts = file.url.split("/");
-    const filePath = urlParts.slice(urlParts.indexOf("files") + 1).join("/");
+    const filePath = urlParts.slice(urlParts.indexOf("files") + 1).join("/"); // only /path/to/file now
 
     // Delete from Supabase Storage
     const { error } = await supabase.storage.from("files").remove([filePath]);
 
     if (error) {
       console.error("Error deleting file from Supabase:", error);
-      // We've already deleted the DB record, so just log the error
     }
 
     res.status(200).send();
@@ -94,9 +94,6 @@ async function deleteFile(req, res) {
 }
 
 async function renameFile(req, res) {
-  const fs = require("fs");
-  const path = require("path");
-
   try {
     const { newName } = req.body;
 
@@ -118,7 +115,7 @@ async function renameFile(req, res) {
       return res.status(404).json({ message: "File not found" });
     }
 
-    // Get file extension
+    // Make sure extension there
     const ext = path.extname(file.name);
     const newFileName = newName.endsWith(ext) ? newName : newName + ext;
 
@@ -151,25 +148,12 @@ async function displayFile(req, res) {
       return res.redirect("/?error=File not found");
     }
 
+    file.size = formatFileSize(file.size);
+    file.createdAt = formatDate(file.createdAt);
+
     res.render("file", {
-      file,
+      file: file,
       user: req.user,
-      formatFileSize: (bytes) => {
-        if (!bytes) return "0 Bytes";
-        const k = 1024;
-        const sizes = ["Bytes", "KB", "MB", "GB"];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
-      },
-      formatDate: (date) => {
-        return new Date(date).toLocaleString("en-US", {
-          month: "short",
-          day: "numeric",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        });
-      },
     });
   } catch (error) {
     console.error(error);

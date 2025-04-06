@@ -9,26 +9,21 @@ async function createUser(req, res) {
   try {
     const { name, password } = req.body;
 
-    // Basic validation
     if (!name || !password) {
       return res.redirect(
-        "/auth/signup?error=Username and password are required",
+        "/auth/signup?error=Both username and password are required",
       );
     }
 
-    // Check if user exists
     const existingUser = await prisma.user.findUnique({ where: { name } });
     if (existingUser) {
       return res.redirect("/auth/signup?error=Username already exists");
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Create user
     await prisma.user.create({
       data: {
-        name,
+        name: name,
         password: hashedPassword,
       },
     });

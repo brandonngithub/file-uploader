@@ -1,21 +1,28 @@
 const prisma = require("../db");
+const { formatFileSize, formatDate } = require("../middlewares/helper.js");
 
 async function displayIndex(req, res) {
   try {
     const folders = await prisma.folder.findMany({
-      where: { userId: req.user.id }, // Only show current user's folders
+      where: { userId: req.user.id },
     });
 
     const files = await prisma.file.findMany({
       where: {
         folderId: null, // Only files not in folders
-        userId: req.user.id, // Only show current user's files
+        userId: req.user.id,
       },
     });
 
+    const formattedFiles = files.map((file) => ({
+      ...file,
+      size: formatFileSize(file.size),
+      createdAt: formatDate(file.createdAt),
+    }));
+
     res.render("index", {
-      folders,
-      files,
+      folders: folders,
+      files: formattedFiles,
       error: req.query.error || null,
       success: req.query.success || null,
       user: req.user,

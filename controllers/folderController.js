@@ -1,5 +1,6 @@
 const prisma = require("../db");
 const supabase = require("../middlewares/supabase");
+const { formatFileSize, formatDate } = require("../middlewares/helper.js");
 
 async function createFolder(req, res) {
   try {
@@ -20,6 +21,7 @@ async function createFolder(req, res) {
   } catch (error) {
     let errorMessage = "Failed to create folder";
     if (error.code === "P2002") {
+      // P2002 is a prisma error
       errorMessage = "A folder with this name already exists for this user";
     }
     res.redirect(`/?error=${encodeURIComponent(errorMessage)}`);
@@ -31,7 +33,7 @@ async function displayFolder(req, res) {
     const folder = await prisma.folder.findUnique({
       where: {
         id: req.params.id,
-        userId: req.user.id, // Ensure the folder belongs to current user
+        userId: req.user.id,
       },
     });
 
@@ -42,33 +44,23 @@ async function displayFolder(req, res) {
     const files = await prisma.file.findMany({
       where: {
         folderId: req.params.id,
-        userId: req.user.id, // Only show current user's files
+        userId: req.user.id,
       },
       orderBy: { name: "asc" },
     });
 
+    const formattedFiles = files.map((file) => ({
+      ...file,
+      size: formatFileSize(file.size),
+      createdAt: formatDate(file.createdAt),
+    }));
+
     res.render("folder", {
-      folder,
-      files,
+      folder: folder,
+      files: formattedFiles,
       error: req.query.error || null,
       success: req.query.success || null,
       user: req.user,
-      formatFileSize: (bytes) => {
-        if (!bytes) return "0 Bytes";
-        const k = 1024;
-        const sizes = ["Bytes", "KB", "MB", "GB"];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
-      },
-      formatDate: (date) => {
-        return new Date(date).toLocaleString("en-US", {
-          month: "short",
-          day: "numeric",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        });
-      },
     });
   } catch (error) {
     res.redirect("/?error=Folder not found");
@@ -77,7 +69,6 @@ async function displayFolder(req, res) {
 
 async function deleteFolder(req, res) {
   try {
-    // First get all files in the folder
     const files = await prisma.file.findMany({
       where: {
         folderId: req.params.id,
@@ -85,16 +76,15 @@ async function deleteFolder(req, res) {
       },
     });
 
-    // Delete all files from Supabase storage
+    // Delete files from Supabase storage
     const deletePromises = files.map(async (file) => {
       try {
-        // Extract path from URL (assuming URL is like: https://[supabase-url]/storage/v1/object/public/files/path/to/file)
+        // Extract path from URL that looks like https://[supabase-url]/storage/v1/object/public/files/path/to/file
         const urlParts = file.url.split("/");
         const filePath = urlParts
           .slice(urlParts.indexOf("files") + 1)
           .join("/");
 
-        // Delete from Supabase Storage
         const { error } = await supabase.storage
           .from("files")
           .remove([filePath]);
@@ -109,7 +99,7 @@ async function deleteFolder(req, res) {
 
     await Promise.all(deletePromises);
 
-    // Delete all files from database
+    // Delete files from database
     await prisma.file.deleteMany({
       where: {
         folderId: req.params.id,
@@ -117,7 +107,7 @@ async function deleteFolder(req, res) {
       },
     });
 
-    // Finally delete the folder
+    // Delete folder from database
     await prisma.folder.delete({
       where: {
         id: req.params.id,
