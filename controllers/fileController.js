@@ -1,5 +1,5 @@
 const path = require("path");
-const prisma = require("../db.js");
+const prisma = require("../prisma/db.js");
 const supabase = require("../middlewares/supabase.js");
 const { formatFileSize, formatDate } = require("../middlewares/helper.js");
 

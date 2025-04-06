@@ -1,5 +1,5 @@
 const bcrypt = require("bcrypt");
-const prisma = require("../db");
+const prisma = require("../prisma/db.js");
 
 async function displaySignup(req, res) {
   res.render("signup", { error: req.query.error });
