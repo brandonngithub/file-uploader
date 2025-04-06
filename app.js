@@ -20,10 +20,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(
   session({
     store: new PrismaSessionStore(prisma, {
-      checkPeriod: 2 * 60 * 1000, // ms optional and default is 2 mins
       dbRecordIdIsSessionId: true, // use session ID as database record ID
-      dbRecordIdFunction: undefined, // can also use function to generate record IDs
-      logger: console, // logger optional and default is no logging
+      logger: console,
     }),
     secret: "my-secret-key",
     resave: false,

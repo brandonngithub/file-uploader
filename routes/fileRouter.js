@@ -1,7 +1,7 @@
 const express = require("express");
 const fileController = require("../controllers/fileController.js");
 const ensureAuthenticated = require("../middlewares/auth");
-const upload = require("../middlewares/upload");
+const upload = require("../middlewares/upload.js");
 
 const fileRouter = express();
 

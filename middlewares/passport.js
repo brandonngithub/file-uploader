@@ -1,12 +1,12 @@
+const bcrypt = require("bcrypt");
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
-const bcrypt = require("bcrypt");
 const prisma = require("../db");
 
 passport.use(
   new LocalStrategy(
     {
-      usernameField: "name", // Match the form field (`name="name"`)
+      usernameField: "name", // "name" to match the form field
       passwordField: "password",
     },
     async (name, password, done) => {
