@@ -82,7 +82,7 @@
                                 </td>
                                 <td>Folder</td>
                                 <td>-</td>
-                                <td><%= new Date(folder.createdAt).toLocaleString() %></td>
+                                <td><%= folder.createdAt %></td>
                                 <td class="actions-cell">
                                     <button class="rename-button" onclick="showRenameModal('folder', '<%= folder.id %>', '<%= folder.name %>')">
                                         <i class="material-icons">edit</i>
@@ -103,8 +103,8 @@
                                     </div>
                                 </td>
                                 <td><%= file.type %></td>
-                                <td><%= file.size %> Bytes</td>
-                                <td><%= new Date(file.createdAt).toLocaleString() %></td>
+                                <td><%= file.size %></td>
+                                <td><%= file.createdAt %></td>
                                 <td class="actions-cell">
                                     <button class="rename-button" onclick="showRenameModal('file', '<%= file.id %>', '<%= file.name %>')">
                                         <i class="material-icons">edit</i>

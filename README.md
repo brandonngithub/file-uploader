@@ -2,6 +2,7 @@
 
 - no validation and sanitization done to keep practice focus on other topics
 - need fix cant click see file details in folder
+- maybe add folder size which is all files in folder added
 
 ### Used
 

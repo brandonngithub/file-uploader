@@ -14,6 +14,11 @@ async function displayIndex(req, res) {
       },
     });
 
+    const formattedFolders = files.map((folder) => ({
+      ...folder,
+      createdAt: formatDate(folder.createdAt),
+    }));
+
     const formattedFiles = files.map((file) => ({
       ...file,
       size: formatFileSize(file.size),
@@ -21,7 +26,7 @@ async function displayIndex(req, res) {
     }));
 
     res.render("index", {
-      folders: folders,
+      folders: formattedFolders,
       files: formattedFiles,
       error: req.query.error || null,
       success: req.query.success || null,
