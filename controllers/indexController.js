@@ -14,7 +14,7 @@ async function displayIndex(req, res) {
       },
     });
 
-    const formattedFolders = files.map((folder) => ({
+    const formattedFolders = folders.map((folder) => ({
       ...folder,
       createdAt: formatDate(folder.createdAt),
     }));
