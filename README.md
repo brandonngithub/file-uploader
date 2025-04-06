@@ -71,15 +71,18 @@
 - TypedSQL no work w mongo
 
 ### Prisma migrate getting started
+
 - https://www.prisma.io/docs/orm/prisma-migrate/getting-started
 - basically create Prisma schema, do first migration, if change schema, do second migration, and on...
 - also example provided for introspecting
 
 ### Prisma migrate mental model
+
 - https://www.prisma.io/docs/orm/prisma-migrate/understanding-prisma-migrate/mental-model
 - model/entity-first migration is defining structure, writing schema, migrating
 - database-first migration is defining structure, creating db in SQL, introspecting
 
 ### Data migrations
+
 - https://www.prisma.io/docs/guides/data-migration
 - the "expand and contract" pattern helps changing database schemas in production effectively

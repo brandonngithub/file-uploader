@@ -5,9 +5,9 @@ const { PrismaSessionStore } = require("@quixo3/prisma-session-store");
 const passport = require("./middlewares/passport");
 const prisma = require("./db");
 const indexRouter = require("./routes/indexRouter");
-const folderRouter = require("./routes/folderRouter");
-const fileRouter = require("./routes/fileRouter");
 const authRouter = require("./routes/authRouter");
+const fileRouter = require("./routes/fileRouter");
+const folderRouter = require("./routes/folderRouter");
 
 const app = express();
 
@@ -37,8 +37,8 @@ app.use(
 app.use(passport.session());
 
 app.use("/", indexRouter);
-app.use("/folder", folderRouter);
-app.use("/file", fileRouter);
 app.use("/auth", authRouter);
+app.use("/file", fileRouter);
+app.use("/folder", folderRouter);
 
 app.listen(3000, () => console.log("Listening on port 3000"));
