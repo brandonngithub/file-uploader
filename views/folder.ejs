@@ -69,7 +69,7 @@
                             </tr>
                         <% } else { %>
                             <% files.forEach(file => { %>
-                                <tr class="file-row" data-file-id="<%= file.id %>">
+                                <tr class="file-row" data-file-id="<%= file.id %>" ondblclick="window.location.href='/file/<%= file.id %>'">
                                     <td class="name-cell">
                                         <div class="file-info">
                                             <i class="material-icons file-icon">insert_drive_file</i>
