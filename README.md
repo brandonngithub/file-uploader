@@ -6,7 +6,7 @@ This Express project is essentially a simplified version of Google Drive with al
 
 - Node.js, Express, EJS, PostgreSQL
 - Prisma ORM to get familiar with object relational mappers
-- Passport.js (local strategy) for authentication and authorization
+- Passport.js (local strategy) for session based authentication
 - Multer to handle file uploads
 - Supabase storage to store files in the cloud (URL stored in database)
 
