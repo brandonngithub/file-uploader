@@ -36,14 +36,10 @@
         <div class="content">
             <div class="file-details-container">
                 <div class="file-preview">
-                    <% if (file.type.match(/^image\//)) { %>
-                        <img src="<%= file.url %>" alt="<%= file.name %>" class="preview-image">
-                    <% } else { %>
-                        <div class="file-icon-large">
-                            <i class="material-icons">insert_drive_file</i>
-                            <span class="file-extension"><%= file.type %></span>
-                        </div>
-                    <% } %>
+                    <div class="file-icon-large">
+                        <i class="material-icons">insert_drive_file</i>
+                        <span class="file-extension"><%= file.type %></span>
+                    </div>
                 </div>
 
                 <div class="file-info-details">
@@ -84,7 +80,5 @@
             </div>
         </div>
     </div>
-
-    <script src="/scripts/file.js" defer></script>
 </body>
 </html>
