@@ -15,14 +15,14 @@
             <div class="user-avatar">
                 <%= user.name.charAt(0).toUpperCase() %>
             </div>
-            <div class="dropdown-content">
-                <a href="/auth/logout">Logout</a>
+            <div class="dropdown-content" role="menu">
+                <a href="/auth/logout" role="menuitem">Logout</a>
             </div>
         </div>
     </header>
 
-    <div class="main">
-        <div class="sidebar">
+    <main class="main">
+        <nav class="sidebar">
             <div class="sidebar-item active">
                 <i class="material-icons">home</i>
                 <span>Home</span>
@@ -32,29 +32,29 @@
                     <i class="material-icons">add</i>
                     <span>New</span>
                 </button>
-                <div class="new-menu" id="newMenu">
-                    <div class="new-menu-item" onclick="showModal('folder')">
+                <div class="new-menu" id="newMenu" role="menu">
+                    <div class="new-menu-item" onclick="showModal('folder')" role="menuitem">
                         <i class="material-icons">create_new_folder</i>
                         <span>Folder</span>
                     </div>
-                    <div class="new-menu-item" onclick="showModal('file')">
+                    <div class="new-menu-item" onclick="showModal('file')" role="menuitem">
                         <i class="material-icons">upload</i>
                         <span>File upload</span>
                     </div>
                 </div>
             </div>
-        </div>
+        </nav>
 
         <div class="content">
             <% if (error) { %>
-                <div class="alert alert-error">
+                <div class="alert alert-error" role="alert">
                     <i class="material-icons">error</i>
                     <%= error %>
                 </div>
             <% } %>
             
             <% if (success) { %>
-                <div class="alert alert-success">
+                <div class="alert alert-success" role="alert">
                     <i class="material-icons">check_circle</i>
                     <%= success %>
                 </div>
@@ -64,11 +64,11 @@
                 <table class="files-table">
                     <thead>
                         <tr>
-                            <th class="name-column">Name</th>
-                            <th class="type-column">Type</th>
-                            <th class="size-column">Size</th>
-                            <th class="modified-column">Modified</th>
-                            <th class="actions-column">Actions</th>
+                            <th scope="col" class="name-column">Name</th>
+                            <th scope="col" class="type-column">Type</th>
+                            <th scope="col" class="size-column">Size</th>
+                            <th scope="col" class="modified-column">Modified</th>
+                            <th scope="col" class="actions-column">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -119,13 +119,13 @@
                 </table>
             </div>
         </div>
-    </div>
+    </main>
 
     <!-- New Folder Modal -->
-    <div class="modal" id="folderModal">
+    <div class="modal" id="folderModal" role="dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>New folder</h2>
+                <h2 id="folderModalTitle">New folder</h2>
                 <button class="close-button" onclick="hideModal('folder')">&times;</button>
             </div>
             <form action="/folder" method="POST">
@@ -142,10 +142,10 @@
     </div>
 
     <!-- New File Modal -->
-    <div class="modal" id="fileModal">
+    <div class="modal" id="fileModal" role="dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Upload files</h2>
+                <h2 id="fileModalTitle">Upload files</h2>
                 <button class="close-button" onclick="hideModal('file')">&times;</button>
             </div>
             <form action="/file" method="POST" enctype="multipart/form-data">
@@ -171,7 +171,7 @@
     </div>
 
     <!-- Rename Modal -->
-    <div class="modal" id="renameModal">
+    <div class="modal" id="renameModal" role="dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <h2 id="renameModalTitle">Rename</h2>
