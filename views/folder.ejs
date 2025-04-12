@@ -15,15 +15,15 @@
             <div class="user-avatar">
                 <%= user.name.charAt(0).toUpperCase() %>
             </div>
-            <div class="dropdown-content">
-                <a href="/auth/logout">Logout</a>
+            <div class="dropdown-content" role="menu">
+                <a href="/auth/logout" role="menuitem">Logout</a>
             </div>
         </div>
     </header>
 
-    <div class="main">
-        <div class="sidebar">
-            <div class="sidebar-item" onclick="window.location.href='/'">
+    <main class="main">
+        <nav class="sidebar">
+            <div class="sidebar-item" onclick="window.location.href='/'" role="button" tabindex="0">
                 <i class="material-icons">home</i>
                 <span>Home</span>
             </div>
@@ -31,18 +31,18 @@
                 <i class="material-icons">folder</i>
                 <span><%= folder.name %></span>
             </div>
-        </div>
+        </nav>
 
         <div class="content">
             <% if (error) { %>
-                <div class="alert alert-error">
+                <div class="alert alert-error" role="alert">
                     <i class="material-icons">error</i>
                     <%= error %>
                 </div>
             <% } %>
             
             <% if (success) { %>
-                <div class="alert alert-success">
+                <div class="alert alert-success" role="alert">
                     <i class="material-icons">check_circle</i>
                     <%= success %>
                 </div>
@@ -52,11 +52,11 @@
                 <table class="files-table">
                     <thead>
                         <tr>
-                            <th class="name-column">Name</th>
-                            <th class="type-column">Type</th>
-                            <th class="size-column">Size</th>
-                            <th class="modified-column">Modified</th>
-                            <th class="actions-column">Actions</th>
+                            <th scope="col" class="name-column">Name</th>
+                            <th scope="col" class="type-column">Type</th>
+                            <th scope="col" class="size-column">Size</th>
+                            <th scope="col" class="modified-column">Modified</th>
+                            <th scope="col" class="actions-column">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -94,27 +94,27 @@
                 </table>
             </div>
         </div>
-    </div>
+    </main>
 
     <!-- Rename Modal -->
-    <div class="modal" id="renameModal">
+    <div class="modal" id="renameModal" role="dialog">
         <div class="modal-content">
-        <div class="modal-header">
-            <h2>Rename File</h2>
-            <button class="close-button" onclick="hideModal('rename')">&times;</button>
-        </div>
-        <form id="renameForm">
-            <div class="form-group">
-            <label for="newName">New name</label>
-            <input type="text" name="newName" id="newName" required>
+            <div class="modal-header">
+                <h2 id="renameModalTitle">Rename File</h2>
+                <button class="close-button" onclick="hideModal('rename')">&times;</button>
             </div>
-            <input type="hidden" id="renameType" name="type">
-            <input type="hidden" id="renameId" name="id">
-            <div class="modal-footer">
-            <button type="button" class="cancel-button" onclick="hideModal('rename')">Cancel</button>
-            <button type="submit" class="create-button">Rename</button>
-            </div>
-        </form>
+            <form id="renameForm">
+                <div class="form-group">
+                    <label for="newName">New name</label>
+                    <input type="text" name="newName" id="newName" required>
+                </div>
+                <input type="hidden" id="renameType" name="type">
+                <input type="hidden" id="renameId" name="id">
+                <div class="modal-footer">
+                    <button type="button" class="cancel-button" onclick="hideModal('rename')">Cancel</button>
+                    <button type="submit" class="create-button">Rename</button>
+                </div>
+            </form>
         </div>
     </div>
 
