@@ -1,4 +1,5 @@
 :root {
+  /* Colors */
   --primary: #4285f4;
   --primary-dark: #3367d6;
   --error: #ea4335;
@@ -8,41 +9,57 @@
   --text-light: #5f6368;
   --light-gray: #f8f9fa;
   --white: #ffffff;
+  --border-color: #e0e0e0;
+
+  /* Spacing */
+  --spacing-xs: 8px;
+  --spacing-sm: 16px;
+  --spacing-md: 24px;
+  --spacing-lg: 32px;
+
+  /* Typography */
+  --font-size-sm: 14px;
+  --font-size-md: 20px;
+  --font-size-lg: 22px;
+
+  /* Effects */
   --border-radius: 4px;
   --box-shadow:
     0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+  --transition: all 0.3s ease;
 }
 
+/* Base Styles */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "Roboto", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
 body {
-  background-color: var(--white);
   color: var(--text);
+  font-family: "Roboto", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   line-height: 1.6;
+  background-color: var(--white);
 }
 
+/* Header Styles */
 header {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  padding: 8px 16px;
-  border-bottom: 1px solid #e0e0e0;
+  align-items: center;
   height: 57px;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-bottom: 1px solid var(--border-color);
 }
 
 header h1 {
-  display: flex;
-  align-items: center;
-  font-size: 22px;
+  font-size: var(--font-size-lg);
   font-weight: 400;
   color: var(--text-light);
 }
 
+/* User Menu */
 .user-menu {
   position: relative;
   display: inline-block;
@@ -51,18 +68,18 @@ header h1 {
 .user-avatar {
   width: 32px;
   height: 32px;
-  border-radius: 50%;
-  background-color: var(--primary);
-  color: white;
   display: flex;
   align-items: center;
   justify-content: center;
+  background-color: var(--primary);
+  color: var(--white);
+  border-radius: 50%;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: var(--transition);
 }
 
 .user-avatar:hover {
-  background-color: #2563eb;
+  background-color: var(--primary-dark);
   transform: scale(1.05);
 }
 
@@ -70,52 +87,55 @@ header h1 {
   display: none;
   position: absolute;
   right: 0;
-  background-color: white;
   min-width: 120px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-  border-radius: 5px;
+  background-color: var(--white);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
   z-index: 1;
   overflow: hidden;
 }
 
 .dropdown-content a {
-  color: #333;
-  padding: 12px 16px;
-  text-decoration: none;
   display: block;
+  padding: var(--spacing-sm);
+  color: var(--text);
+  text-decoration: none;
   transition: background-color 0.3s;
 }
 
 .dropdown-content a:hover {
-  background-color: #f1f1f1;
+  background-color: var(--light-gray);
 }
 
 .user-menu:hover .dropdown-content {
   display: block;
 }
 
+/* Main Layout */
 .main {
   display: flex;
-  min-height: calc(100vh - 57px); /* Accounts for header height */
+  min-height: calc(100vh - 57px);
 }
 
+/* Sidebar */
 .sidebar {
   width: 280px;
-  padding: 16px 0;
-  border-right: 1px solid #e0e0e0;
+  padding: var(--spacing-sm) 0;
+  border-right: 1px solid var(--border-color);
 }
 
 .sidebar-item {
   display: flex;
   align-items: center;
-  padding: 8px 24px;
+  padding: var(--spacing-xs) var(--spacing-md);
   cursor: pointer;
   border-radius: 0 25px 25px 0;
-  font-size: 14px;
+  font-size: var(--font-size-sm);
+  transition: var(--transition);
 }
 
 .sidebar-item:hover {
-  background-color: #f1f3f4;
+  background-color: var(--light-gray);
 }
 
 .sidebar-item.active {
@@ -124,39 +144,34 @@ header h1 {
 }
 
 .sidebar-item i {
-  margin-right: 16px;
+  margin-right: var(--spacing-sm);
   font-size: 20px;
 }
 
+/* Content Area */
 .content {
   flex-grow: 1;
-  padding: 24px;
-  background-color: var(--white);
+  padding: var(--spacing-md);
 }
 
+/* File Details */
 .file-details-container {
   display: flex;
-  gap: 32px;
-  margin-top: 16px;
+  gap: var(--spacing-lg);
+  margin-top: var(--spacing-sm);
 }
 
 .file-preview {
   width: 300px;
   height: 300px;
-  border: 1px solid #e0e0e0;
-  border-radius: var(--border-radius);
   display: flex;
   align-items: center;
   justify-content: center;
   background-color: var(--light-gray);
-  padding: 16px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-sm);
   flex-shrink: 0;
-}
-
-.preview-image {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
 }
 
 .file-icon-large {
@@ -168,34 +183,35 @@ header h1 {
 
 .file-icon-large i {
   font-size: 64px;
-  margin-bottom: 8px;
+  margin-bottom: var(--spacing-xs);
 }
 
 .file-extension {
-  text-transform: uppercase;
+  font-size: var(--font-size-sm);
   font-weight: 500;
   color: var(--text-light);
-  font-size: 14px;
+  text-transform: uppercase;
 }
 
 .file-info-details h2 {
+  font-size: var(--font-size-md);
   font-weight: 400;
-  margin-bottom: 24px;
+  margin-bottom: var(--spacing-md);
   color: var(--text);
-  font-size: 20px;
   word-break: break-word;
 }
 
+/* File Properties */
 .file-properties {
-  margin-bottom: 24px;
+  margin-bottom: var(--spacing-md);
 }
 
 .property {
   display: flex;
-  margin-bottom: 12px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #e0e0e0;
-  font-size: 14px;
+  margin-bottom: var(--spacing-sm);
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 1px solid var(--border-color);
+  font-size: var(--font-size-sm);
 }
 
 .property:last-child {
@@ -215,47 +231,31 @@ header h1 {
   color: var(--text);
 }
 
+/* File Actions */
 .file-actions {
   display: flex;
-  gap: 8px;
-  margin-top: 24px;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-md);
 }
 
 .download-button {
-  background-color: var(--primary);
-  color: white;
-  padding: 8px 16px;
-  border-radius: var(--border-radius);
-  text-decoration: none;
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  border: none;
-  cursor: pointer;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background-color: var(--primary);
+  color: var(--white);
+  border-radius: var(--border-radius);
+  text-decoration: none;
+  font-size: var(--font-size-sm);
+  transition: var(--transition);
 }
 
 .download-button:hover {
   background-color: var(--primary-dark);
 }
 
-.delete-button {
-  background: none;
-  border: none;
-  color: var(--error);
-  cursor: pointer;
-  padding: 8px 16px;
-  border-radius: var(--border-radius);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-}
-
-.delete-button:hover {
-  background-color: #fce8e6;
-}
-
+/* Responsive Design */
 @media (max-width: 768px) {
   .file-details-container {
     flex-direction: column;

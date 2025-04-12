@@ -15,15 +15,15 @@
             <div class="user-avatar">
                 <%= user.name.charAt(0).toUpperCase() %>
             </div>
-            <div class="dropdown-content">
-                <a href="/auth/logout">Logout</a>
+            <div class="dropdown-content" role="menu">
+                <a href="/auth/logout" role="menuitem">Logout</a>
             </div>
         </div>
     </header>
 
-    <div class="main">
-        <div class="sidebar">
-            <div class="sidebar-item" onclick="window.location.href='/'">
+    <main class="main">
+        <nav class="sidebar">
+            <div class="sidebar-item" onclick="window.location.href='/'" role="button" tabindex="0">
                 <i class="material-icons">home</i>
                 <span>Home</span>
             </div>
@@ -31,10 +31,10 @@
                 <i class="material-icons">folder</i>
                 <span><%= file.name %></span>
             </div>
-        </div>
+        </nav>
 
         <div class="content">
-            <div class="file-details-container">
+            <section class="file-details-container">
                 <div class="file-preview">
                     <div class="file-icon-large">
                         <i class="material-icons">insert_drive_file</i>
@@ -45,30 +45,30 @@
                 <div class="file-info-details">
                     <h2><%= file.name %></h2>
                     
-                    <div class="file-properties">
+                    <dl class="file-properties">
                         <div class="property">
-                            <span class="property-label">Type:</span>
-                            <span class="property-value"><%= file.type %></span>
+                            <dt class="property-label">Type:</dt>
+                            <dd class="property-value"><%= file.type %></dd>
                         </div>
                         <div class="property">
-                            <span class="property-label">Size:</span>
-                            <span class="property-value"><%= file.size %></span>
+                            <dt class="property-label">Size:</dt>
+                            <dd class="property-value"><%= file.size %></dd>
                         </div>
                         <div class="property">
-                            <span class="property-label">Uploaded:</span>
-                            <span class="property-value"><%= file.createdAt %></span>
+                            <dt class="property-label">Uploaded:</dt>
+                            <dd class="property-value"><%= file.createdAt %></dd>
                         </div>
                         <div class="property">
-                            <span class="property-label">Location:</span>
-                            <span class="property-value">
+                            <dt class="property-label">Location:</dt>
+                            <dd class="property-value">
                                 <% if (file.folderId) { %>
                                     Folder
                                 <% } else { %>
                                     My Drive
                                 <% } %>
-                            </span>
+                            </dd>
                         </div>
-                    </div>
+                    </dl>
 
                     <div class="file-actions">
                         <a href="<%= file.url %>" download="<%= file.name %>" class="download-button">
@@ -77,8 +77,8 @@
                         </a>
                     </div>
                 </div>
-            </div>
+            </section>
         </div>
-    </div>
+    </main>
 </body>
 </html>
