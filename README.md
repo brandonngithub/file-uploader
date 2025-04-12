@@ -1,4 +1,4 @@
-# file_uploader
+# file-uploader
 
 This Express project is essentially a simplified version of Google Drive with all the basic features. 
 
