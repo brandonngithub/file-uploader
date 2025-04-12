@@ -10,7 +10,7 @@ This Express project is essentially a simplified version of Google Drive with al
 - Multer to handle file uploads
 - Supabase storage to store files in the cloud (URL stored in database)
 
-(NOTE: no validation and sanitization was done in order to keep the practice focus on other topics)
+(NOTE: no validation and sanitization was done in order to keep the focus on other topics)
 
 ### How to run locally
 - Clone the repo and run `npm install` to install dependencies
