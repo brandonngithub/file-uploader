@@ -1,14 +1,22 @@
 # file_uploader
 
-- no validation and sanitization done to keep practice focus on other topics
-- separate client side javascript too
+This Express project is essentially a simplified version of Google Drive with all the basic features. 
 
-### Used
+### Tech Used
 
-- supabase storage
-- multer
-- passport js
-- prisma
+- Node.js, Express, EJS, PostgreSQL
+- Prisma as the object relational mapper to get familiar
+- Passport.js (local strategy) for authentication and authorization
+- Multer to handle file uploads
+- Supabase storage to store files in the cloud (URL stored in database)
+
+(NOTE: no validation and sanitization was done in order to keep the practice focus on other topics)
+
+### How to run locally
+- Clone the repo and run `npm install` to install dependencies
+- Create PostgreSQL database, create Supabase storage, fill environment variables
+- Run the application with `node app.js` or nodemon if you prefer
+- If you want to check the db with an interface do `npx prisma studio`
 
 # Notes
 
